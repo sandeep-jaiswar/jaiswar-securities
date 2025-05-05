@@ -1,0 +1,3 @@
+package(default_visibility = ["//visibility:public"])
+
+# Optionally group build targets here for CI/test infra
