@@ -1,0 +1,9 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
+py_binary(
+    name = "chronicle_pipeline",
+    srcs = glob(["pipelines/**/*.py"]),
+    main = "pipelines/main.py",
+    visibility = ["//visibility:public"],
+    deps = [],  # Add any required dependencies here
+)

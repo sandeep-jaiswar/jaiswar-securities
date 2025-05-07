@@ -1,0 +1,114 @@
+# Root-level .gitignore for Jaiswar Securities Monorepo
+
+# Bazel output directories
+bazel-*
+bazel-bin/
+bazel-out/
+bazel-testlogs/
+bazel-workspace/
+
+# Bazel symlinks
+*.runfiles/
+*.runfiles_manifest
+*.exe.runfiles/
+*.exe.runfiles_manifest
+
+# Node / JS / TypeScript
+node_modules/
+dist/
+.build/
+.next/
+*.log
+yarn.lock
+pnpm-lock.yaml
+package-lock.json
+
+# Bun
+.bun/
+
+# Rust
+target/
+Cargo.lock
+
+# Go
+bin/
+pkg/
+*.exe
+*.test
+*.out
+*.coverprofile
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+.env
+.venv/
+venv/
+pip-wheel-metadata/
+.mypy_cache/
+.pytest_cache/
+.tox/
+
+# Java / Kotlin / JVM
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+.gradle/
+build/
+
+# Scala
+target/
+project/target/
+project/project/
+
+# JetBrains / IntelliJ
+.idea/
+*.iml
+*.iws
+out/
+
+# VS Code
+.vscode/
+.history/
+.vs
+
+# MacOS
+.DS_Store
+
+# Linux
+*~
+
+# Logs
+*.log
+logs/
+*.pid
+
+# Editor / System backups
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Docker
+*.tar
+.envrc
+docker-compose.override.yml
+
+# Misc
+*.gz
+*.zip
+*.tgz
+*.tmp
+
+# Protobuf build artifacts
+*.pb.go
+*.pb.cc
+*.pb.h
+*.pb.c
+*.pb.ts
+*.pb.js
+*.d.ts

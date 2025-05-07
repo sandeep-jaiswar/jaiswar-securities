@@ -1,0 +1,8 @@
+load("@rules_go//go:deps.bzl", "go_binary")
+
+go_binary(
+    name = "hermes_settle_service",
+    srcs = glob(["src/**/*.go"]),
+    importpath = "github.com/jaiswar/hermes-settle",
+    visibility = ["//visibility:public"],
+)

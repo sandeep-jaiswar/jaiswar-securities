@@ -1,0 +1,8 @@
+load("@npm//:index.bzl", "ts_library")
+
+ts_library(
+    name = "helix_frontend",
+    srcs = glob(["frontend/**/*.{ts,tsx}"]),
+    deps = [],
+    visibility = ["//visibility:public"],
+)
