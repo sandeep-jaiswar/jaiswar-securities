@@ -1,0 +1,5 @@
+filegroup(
+    name = "vanguard_mesh_config",
+    srcs = glob(["mesh/**/*"]),
+    visibility = ["//visibility:public"],
+)

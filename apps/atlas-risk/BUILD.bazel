@@ -1,0 +1,11 @@
+load("@io_bazel_rules_scala//scala:scala.bzl", "scala_binary")
+
+scala_binary(
+    name = "atlas_risk_bin",
+    srcs = glob(["src/**/*.scala"]),
+    deps = [
+        "//libs/common:math",
+        "//libs/common:grpc",
+    ],
+    visibility = ["//visibility:public"],
+)

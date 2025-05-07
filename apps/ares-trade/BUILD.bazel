@@ -1,0 +1,11 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "ares_trade_bin",
+    srcs = glob(["src/**/*.rs"]),
+    deps = [
+        "//libs/common:networking",
+        "//libs/common:metrics",
+    ],
+    edition = "2021",
+)

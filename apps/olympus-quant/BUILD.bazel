@@ -1,0 +1,5 @@
+filegroup(
+    name = "notebooks",
+    srcs = glob(["notebooks/**/*.ipynb"]),
+    visibility = ["//visibility:public"],
+)
