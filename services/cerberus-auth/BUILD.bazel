@@ -32,6 +32,11 @@ java_library(
         artifact("org.springframework.data:spring-data-jpa"),
         artifact("org.springframework:spring-orm"),
         artifact("org.hibernate.orm:hibernate-core"),
+
+        # Added based on strict deps error
+        artifact("jakarta.annotation:jakarta.annotation-api"),
+        artifact("org.slf4j:slf4j-api"),
+        artifact("org.springframework:spring-tx"),
     ],
 )
 
