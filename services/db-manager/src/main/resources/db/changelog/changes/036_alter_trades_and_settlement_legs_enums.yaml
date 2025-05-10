@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter_trades_and_settlement_legs_enums_036
+      author: gemini-idx-assistant
+      changes:
+        # Alter trades.commission_type
+        - addColumn:
+            tableName: trades
+            columns:
+              - column:
+                  name: commission_type_enum
+                  type: commission_type_enum
+        # Step 2: (Manual/Scripted Step if data exists) Update new column based on old column
+        # e.g., UPDATE trades SET commission_type_enum = 'PER_UNIT' WHERE commission_type = '1';
+        - dropColumn:
+            tableName: trades
+            columnName: commission_type
+        - renameColumn:
+            tableName: trades
+            oldColumnName: commission_type_enum
+            newColumnName: commission_type
+            columnDataType: commission_type_enum
+
+        # Alter settlement_legs.direction
+        - addColumn:
+            tableName: settlement_legs
+            columns:
+              - column:
+                  name: direction_enum
+                  type: transaction_direction_enum
+        # (Manual Step if data exists) UPDATE settlement_legs SET direction_enum = 'DEBIT' WHERE direction = 'DEBIT';
+        - dropColumn:
+            tableName: settlement_legs
+            columnName: direction
+        - renameColumn:
+            tableName: settlement_legs
+            oldColumnName: direction_enum
+            newColumnName: direction
+            columnDataType: transaction_direction_enum

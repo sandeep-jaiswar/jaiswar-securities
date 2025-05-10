@@ -67,4 +67,14 @@ databaseChangeLog:
       file: db/changelog/changes/032_create_settlement_instructions_table.yaml
   - include:
       file: db/changelog/changes/033_create_settlement_legs_table.yaml
+  - include:
+      file: db/changelog/changes/034_alter_equity_details_add_audit.yaml
+  - include:
+      file: db/changelog/changes/035_create_additional_trading_enums.yaml
+  - include:
+      file: db/changelog/changes/036_alter_trades_and_settlement_legs_enums.yaml
+  - include:
+      file: db/changelog/changes/037_alter_orders_add_created_by.yaml
+  - include:
+      file: db/changelog/changes/038_alter_orders_trades_exchange_fks.yaml
   # Add further table creations or changesets here

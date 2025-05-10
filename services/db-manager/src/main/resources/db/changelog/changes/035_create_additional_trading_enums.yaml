@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_additional_trading_enums_035
+      author: gemini-idx-assistant
+      changes:
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'commission_type_enum') THEN
+                  CREATE TYPE commission_type_enum AS ENUM (
+                    'PER_UNIT',
+                    'PERCENTAGE',
+                    'ABSOLUTE',
+                    'PERCENTAGE_WAIVED_CASH_DISCOUNT',
+                    'PERCENTAGE_WAIVED_ENHANCED_UNITS',
+                    'POINTS_PER_BOND_OR_CONTRACT',
+                    'OTHER'
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_direction_enum') THEN
+                  CREATE TYPE transaction_direction_enum AS ENUM ('DEBIT', 'CREDIT');
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
