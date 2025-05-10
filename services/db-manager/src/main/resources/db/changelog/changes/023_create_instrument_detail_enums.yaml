@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: create_instrument_detail_enums_023 # Important: ID remains unchanged
+      id: create_instrument_detail_enums_023
       author: sandeep-jaiswar
       changes:
         - createType:

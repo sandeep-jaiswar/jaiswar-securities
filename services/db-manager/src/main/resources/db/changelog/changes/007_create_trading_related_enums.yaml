@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: create_trading_related_enums_007_rev1 # Important: ID remains unchanged
+      id: create_trading_related_enums_007_rev1
       author: sandeep-jaiswar
       changes:
         - createType:

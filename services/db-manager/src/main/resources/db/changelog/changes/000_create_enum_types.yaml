@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: create_enum_types_000 # Important: ID remains unchanged
+      id: create_enum_types_000
       author: sandeep-jaiswar
       changes:
         - createType:

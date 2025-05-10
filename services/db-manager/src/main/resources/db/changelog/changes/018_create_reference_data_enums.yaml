@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: create_reference_data_enums_018 # Important: ID remains unchanged
+      id: create_reference_data_enums_018
       author: sandeep-jaiswar
       changes:
         - createType:
