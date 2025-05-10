@@ -1,0 +1,81 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_instrument_prices_table_008
+      author: gemini-idx-assistant
+      # This table is designed to store time-series price data (ticks or bars).
+      # For high-volume data, consider PostgreSQL partitioning (e.g., by instrument_id and/or timestamp range).
+      # Liquibase can manage partitions, but the specific strategy depends on query patterns.
+      changes:
+        - createTable:
+            tableName: instrument_prices
+            columns:
+              - column:
+                  name: price_id
+                  type: BIGSERIAL # Or UUID if preferred, but BIGSERIAL is often good for high-volume time-series data
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: instrument_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_instrument_prices_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: exchange_id # Exchange where this price was recorded
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_instrument_prices_exchange_id
+                    references: exchanges(exchange_id)
+              - column:
+                  name: timestamp # Timestamp of the price point (FIX SendingTime or similar)
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entry_type # BID, OFFER, TRADE, etc.
+                  type: market_data_entry_type_enum 
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: NUMERIC(19, 9) # High precision for prices
+                  constraints:
+                    nullable: false
+              - column:
+                  name: volume
+                  type: BIGINT # For trade volume, or size of bid/offer
+              - column:
+                  name: source # Data source (e.g., specific FIX feed, vendor)
+                  type: VARCHAR(100)
+              - column:
+                  name: received_at # Timestamp when the system received this price data
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+              # Optional columns for OHLC bars if aggregating
+              # - column: {name: open_price, type: NUMERIC(19,9)}
+              # - column: {name: high_price, type: NUMERIC(19,9)}
+              # - column: {name: low_price, type: NUMERIC(19,9)}
+              # - column: {name: close_price, type: NUMERIC(19,9)}
+              # - column: {name: bar_timespan_seconds, type: INTEGER} # e.g., 60 for 1-minute bars
+
+        # Composite index for querying prices for an instrument at a specific time
+        - createIndex:
+            indexName: idx_instrument_prices_instrument_timestamp
+            tableName: instrument_prices
+            columns:
+              - column:
+                  name: instrument_id
+              - column:
+                  name: timestamp
+              - column:
+                  name: entry_type # Often query for specific types like TRADE or BID/OFFER
+        - createIndex:
+            indexName: idx_instrument_prices_timestamp # For time-series queries across instruments
+            tableName: instrument_prices
+            columns:
+              - column:
+                  name: timestamp
+        # Consider a BRIN index on timestamp for very large tables partitioned by time if queries are mostly sequential.
+        # CREATE INDEX brin_instrument_prices_timestamp ON instrument_prices USING brin (timestamp);

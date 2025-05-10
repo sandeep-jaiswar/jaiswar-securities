@@ -1,0 +1,123 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_clients_table_001
+      author: gemini-idx-assistant
+      changes:
+        - createTable:
+            tableName: clients
+            columns:
+              - column:
+                  name: client_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client_type # e.g., INDIVIDUAL, INSTITUTIONAL, CORPORATE
+                  type: client_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(255) # Encrypt PII
+              - column:
+                  name: last_name
+                  type: VARCHAR(255) # Encrypt PII
+              - column:
+                  name: entity_name # For institutional/corporate clients
+                  type: VARCHAR(255)
+              - column:
+                  name: date_of_birth # Encrypt PII
+                  type: DATE
+              - column:
+                  name: tax_id # e.g., SSN, EIN. Encrypt PII
+                  type: VARCHAR(100)
+                  constraints:
+                    unique: true # Ensure unique across non-null tax_ids
+              - column:
+                  name: primary_contact_email # Encrypt PII
+                  type: VARCHAR(255)
+              - column:
+                  name: primary_contact_phone # Encrypt PII
+                  type: VARCHAR(50)
+              - column:
+                  name: address_line1 # Encrypt PII
+                  type: VARCHAR(255)
+              - column:
+                  name: address_line2 # Encrypt PII
+                  type: VARCHAR(255)
+              - column:
+                  name: city # Encrypt PII
+                  type: VARCHAR(100)
+              - column:
+                  name: state_province # Encrypt PII
+                  type: VARCHAR(100)
+              - column: 
+                  name: postal_code # Encrypt PII
+                  type: VARCHAR(20)
+              - column:
+                  name: country # Encrypt PII
+                  type: VARCHAR(100)
+              - column:
+                  name: kyc_status # Know Your Customer status (e.g., PENDING, VERIFIED, REJECTED)
+                  type: kyc_status_enum
+                  defaultValue: "PENDING"
+              - column:
+                  name: aml_risk_rating # Anti-Money Laundering risk (e.g., LOW, MEDIUM, HIGH)
+                  type: aml_risk_rating_enum
+              - column:
+                  name: status # e.g., ACTIVE, INACTIVE, SUSPENDED
+                  type: record_status_enum
+                  defaultValue: "PENDING_ACTIVATION"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by # User or system ID
+                  type: VARCHAR(255)
+              - column:
+                  name: updated_by # User or system ID
+                  type: VARCHAR(255)
+        - createIndex:
+            indexName: idx_clients_client_type
+            tableName: clients
+            columns:
+              - column:
+                  name: client_type
+        - createIndex:
+            indexName: idx_clients_tax_id
+            tableName: clients
+            columns:
+              - column:
+                  name: tax_id
+            unique: true
+        - createIndex:
+            indexName: idx_clients_status
+            tableName: clients
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            indexName: idx_clients_kyc_status
+            tableName: clients
+            columns:
+              - column:
+                  name: kyc_status
+        - createIndex:
+            indexName: idx_clients_entity_name
+            tableName: clients
+            columns:
+              - column:
+                  name: entity_name
+            # Consider adding full-text search capabilities for names/entities if needed

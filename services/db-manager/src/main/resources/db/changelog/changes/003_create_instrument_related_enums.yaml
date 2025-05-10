@@ -1,0 +1,62 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_instrument_related_enums_003
+      author: gemini-idx-assistant
+      changes:
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'asset_class_enum') THEN
+                  CREATE TYPE asset_class_enum AS ENUM (
+                    'EQUITY', 
+                    'FIXED_INCOME', 
+                    'DERIVATIVE', 
+                    'FX', 
+                    'COMMODITY', 
+                    'MUTUAL_FUND', 
+                    'ETF', 
+                    'REAL_ESTATE',
+                    'PRIVATE_EQUITY',
+                    'OTHER'
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'instrument_status_enum') THEN
+                  CREATE TYPE instrument_status_enum AS ENUM (
+                    'ACTIVE', 
+                    'INACTIVE', 
+                    'DELISTED', 
+                    'SUSPENDED', 
+                    'PENDING_APPROVAL', 
+                    'EXPIRED',
+                    'MATURED'
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'identifier_type_enum') THEN
+                  CREATE TYPE identifier_type_enum AS ENUM (
+                    'ISIN',       # International Securities Identification Number
+                    'CUSIP',      # Committee on Uniform Securities Identification Procedures
+                    'SEDOL',      # Stock Exchange Daily Official List
+                    'FIGI',       # Financial Instrument Global Identifier (OpenFIGI)
+                    'TICKER_SYMBOL', # Stock symbol used by exchanges
+                    'EXCHANGE_SYMBOL', # Symbol specific to a particular exchange
+                    'BBG_TICKER', # Bloomberg Ticker
+                    'RIC',        # Reuters Instrument Code
+                    'INTERNAL',   # Proprietary internal identifier
+                    'OTHER'
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
