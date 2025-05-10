@@ -15,10 +15,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Bazel
-        uses: bazelbuild/setup-bazel@v4
-        with:
-          bazelisk-cache: true
+      - name: Setup Bazelisk (Bazel version manager)
+        uses: bazelbuild/setup-bazelisk@v1
 
       - name: Restore Bazel Cache
         uses: actions/cache@v4
