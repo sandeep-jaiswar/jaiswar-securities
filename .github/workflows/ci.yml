@@ -17,6 +17,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Ensure Cache Path Exists
+        run: |
+          mkdir -p ~/.cache/bazel
+
       - name: Setup Bazelisk (Bazel version manager)
         uses: bazelbuild/setup-bazelisk@v1
 
