@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_currencies_table_020
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - createTable:
             tableName: currencies
@@ -52,7 +52,7 @@ databaseChangeLog:
 
   - changeSet:
       id: add_fk_constraints_for_currencies_020
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       # Apply FKs after currencies table is created. 
       # Assumes tables like accounts, instruments etc. already exist from previous changesets.
       # In a real scenario, ensure data consistency before applying non-deferrable FKs.

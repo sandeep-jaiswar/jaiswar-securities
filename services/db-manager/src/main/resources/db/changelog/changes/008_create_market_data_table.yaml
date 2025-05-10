@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_market_data_table_008
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - createTable:
             tableName: market_data

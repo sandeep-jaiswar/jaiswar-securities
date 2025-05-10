@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: alter_trades_and_settlement_legs_enums_036
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         # Alter trades.commission_type
         - addColumn:

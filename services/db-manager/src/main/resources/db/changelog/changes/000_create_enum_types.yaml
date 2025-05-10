@@ -1,51 +1,80 @@
 databaseChangeLog:
   - changeSet:
-      id: create_enum_types_000
-      author: gemini-idx-assistant
+      id: create_enum_types_000 # Important: ID remains unchanged
+      author: sandeep-jaiswar
       changes:
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'client_type_enum') THEN
-                  CREATE TYPE client_type_enum AS ENUM ('INDIVIDUAL', 'INSTITUTIONAL', 'CORPORATE');
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'kyc_status_enum') THEN
-                  CREATE TYPE kyc_status_enum AS ENUM ('PENDING', 'VERIFIED', 'REJECTED', 'EXPIRED', 'IN_REVIEW');
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'aml_risk_rating_enum') THEN
-                  CREATE TYPE aml_risk_rating_enum AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'record_status_enum') THEN
-                  CREATE TYPE record_status_enum AS ENUM ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING_ACTIVATION', 'CLOSED', 'ARCHIVED');
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'account_type_enum') THEN
-                  CREATE TYPE account_type_enum AS ENUM ('TRADING', 'MARGIN', 'CASH', 'CUSTODIAL', 'SETTLEMENT', 'INTERNAL_HOUSE');
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
-      # Using raw SQL with DO/END blocks for robust ENUM creation in PostgreSQL
+        - createType:
+            typeName: client_type_enum
+            values:
+              - value: INDIVIDUAL
+              - value: INSTITUTIONAL
+              - value: CORPORATE
+            remarks: "Type for client categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: client_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: kyc_status_enum
+            values:
+              - value: PENDING
+              - value: VERIFIED
+              - value: REJECTED
+              - value: EXPIRED
+              - value: IN_REVIEW
+            remarks: "Type for KYC (Know Your Customer) statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: kyc_status_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: aml_risk_rating_enum
+            values:
+              - value: LOW
+              - value: MEDIUM
+              - value: HIGH
+              - value: CRITICAL
+            remarks: "Type for AML (Anti-Money Laundering) risk ratings"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: aml_risk_rating_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: record_status_enum
+            values:
+              - value: ACTIVE
+              - value: INACTIVE
+              - value: SUSPENDED
+              - value: PENDING_ACTIVATION
+              - value: CLOSED
+              - value: ARCHIVED
+            remarks: "Generic type for record statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: record_status_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: account_type_enum
+            values:
+              - value: TRADING
+              - value: MARGIN
+              - value: CASH
+              - value: CUSTODIAL
+              - value: SETTLEMENT
+              - value: INTERNAL_HOUSE
+            remarks: "Type for account categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: account_type_enum
+                      schemaName: public # Or your specific schema
+      # Using Liquibase <createType> with preConditions for robust ENUM creation

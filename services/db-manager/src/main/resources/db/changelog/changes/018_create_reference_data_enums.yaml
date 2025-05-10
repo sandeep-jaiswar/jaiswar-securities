@@ -1,19 +1,19 @@
 databaseChangeLog:
   - changeSet:
-      id: create_reference_data_enums_018
-      author: gemini-idx-assistant
+      id: create_reference_data_enums_018 # Important: ID remains unchanged
+      author: sandeep-jaiswar
       changes:
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'calendar_type_enum') THEN
-                  CREATE TYPE calendar_type_enum AS ENUM (
-                    'EXCHANGE_TRADING',
-                    'SETTLEMENT',
-                    'GENERAL_BUSINESS',
-                    'CURRENCY_HOLIDAY'
-                  );
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
+        - createType:
+            typeName: calendar_type_enum
+            values:
+              - value: EXCHANGE_TRADING
+              - value: SETTLEMENT
+              - value: GENERAL_BUSINESS
+              - value: CURRENCY_HOLIDAY
+            remarks: "Type for calendar categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: calendar_type_enum
+                      schemaName: public # Or your specific schema

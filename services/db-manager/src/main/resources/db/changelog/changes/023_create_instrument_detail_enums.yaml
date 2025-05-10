@@ -1,68 +1,131 @@
 databaseChangeLog:
   - changeSet:
-      id: create_instrument_detail_enums_023
-      author: gemini-idx-assistant
+      id: create_instrument_detail_enums_023 # Important: ID remains unchanged
+      author: sandeep-jaiswar
       changes:
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'issuer_type_enum') THEN
-                CREATE TYPE issuer_type_enum AS ENUM ('SOVEREIGN', 'CORPORATE', 'MUNICIPAL', 'SUPRANATIONAL', 'AGENCY');
-              END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'bond_type_enum') THEN
-                CREATE TYPE bond_type_enum AS ENUM (
-                  'GOVERNMENT', 'CORPORATE_FIXED', 'CORPORATE_FLOATING', 'MUNICIPAL', 'CONVERTIBLE', 
-                  'ZERO_COUPON', 'INFLATION_LINKED', 'ASSET_BACKED', 'MORTGAGE_BACKED', 'COVERED_BOND'
-                );
-              END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'coupon_frequency_enum') THEN
-                CREATE TYPE coupon_frequency_enum AS ENUM (
-                  'ANNUAL', 'SEMI_ANNUAL', 'QUARTERLY', 'MONTHLY', 'AT_MATURITY', 'NONE', 'OTHER'
-                );
-              END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'day_count_convention_enum') THEN
-                CREATE TYPE day_count_convention_enum AS ENUM (
-                  'ACT_360', 'ACT_365', 'ACT_365F', 'THIRTY_360', 'ACT_ACT_ISDA', 'ACT_ACT_ICMA', 'EUROBOND_BASIS', 'ONE_ONE'
-                );
-              END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'derivative_type_enum') THEN
-                CREATE TYPE derivative_type_enum AS ENUM ('OPTION', 'FUTURE', 'SWAP', 'FORWARD', 'CFD', 'WARRANT', 'RIGHT');
-              END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'option_type_enum') THEN
-                CREATE TYPE option_type_enum AS ENUM ('CALL', 'PUT');
-              END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'exercise_style_enum') THEN
-                CREATE TYPE exercise_style_enum AS ENUM ('AMERICAN', 'EUROPEAN', 'BERMUDAN', 'CANARY', 'ASIAN');
-              END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'settlement_type_enum') THEN
-                CREATE TYPE settlement_type_enum AS ENUM ('CASH', 'PHYSICAL');
-              END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
+        - createType:
+            typeName: issuer_type_enum
+            values:
+              - value: SOVEREIGN
+              - value: CORPORATE
+              - value: MUNICIPAL
+              - value: SUPRANATIONAL
+              - value: AGENCY
+            remarks: "Type for issuer categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: issuer_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: bond_type_enum
+            values:
+              - value: GOVERNMENT
+              - value: CORPORATE_FIXED
+              - value: CORPORATE_FLOATING
+              - value: MUNICIPAL
+              - value: CONVERTIBLE
+              - value: ZERO_COUPON
+              - value: INFLATION_LINKED
+              - value: ASSET_BACKED
+              - value: MORTGAGE_BACKED
+              - value: COVERED_BOND
+            remarks: "Type for bond categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: bond_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: coupon_frequency_enum
+            values:
+              - value: ANNUAL
+              - value: SEMI_ANNUAL
+              - value: QUARTERLY
+              - value: MONTHLY
+              - value: AT_MATURITY
+              - value: NONE
+              - value: OTHER
+            remarks: "Type for coupon payment frequencies"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: coupon_frequency_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: day_count_convention_enum
+            values:
+              - value: ACT_360
+              - value: ACT_365
+              - value: ACT_365F
+              - value: THIRTY_360
+              - value: ACT_ACT_ISDA
+              - value: ACT_ACT_ICMA
+              - value: EUROBOND_BASIS
+              - value: ONE_ONE
+            remarks: "Type for day count conventions in financial calculations"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: day_count_convention_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: derivative_type_enum
+            values:
+              - value: OPTION
+              - value: FUTURE
+              - value: SWAP
+              - value: FORWARD
+              - value: CFD
+              - value: WARRANT
+              - value: RIGHT
+            remarks: "Type for derivative instrument categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: derivative_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: option_type_enum
+            values:
+              - value: CALL
+              - value: PUT
+            remarks: "Type for option categories (Call/Put)"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: option_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: exercise_style_enum
+            values:
+              - value: AMERICAN
+              - value: EUROPEAN
+              - value: BERMUDAN
+              - value: CANARY
+              - value: ASIAN
+            remarks: "Type for option exercise styles"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: exercise_style_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: settlement_type_enum
+            values:
+              - value: CASH
+              - value: PHYSICAL
+            remarks: "Type for settlement methods (Cash/Physical)"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: settlement_type_enum
+                      schemaName: public # Or your specific schema

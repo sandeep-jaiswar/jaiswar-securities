@@ -1,62 +1,62 @@
 databaseChangeLog:
   - changeSet:
-      id: create_instrument_related_enums_003
-      author: gemini-idx-assistant
+      id: create_instrument_related_enums_003 # Important: ID remains unchanged
+      author: sandeep-jaiswar
       changes:
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'asset_class_enum') THEN
-                  CREATE TYPE asset_class_enum AS ENUM (
-                    'EQUITY', 
-                    'FIXED_INCOME', 
-                    'DERIVATIVE', 
-                    'FX', 
-                    'COMMODITY', 
-                    'MUTUAL_FUND', 
-                    'ETF', 
-                    'REAL_ESTATE',
-                    'PRIVATE_EQUITY',
-                    'OTHER'
-                  );
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'instrument_status_enum') THEN
-                  CREATE TYPE instrument_status_enum AS ENUM (
-                    'ACTIVE', 
-                    'INACTIVE', 
-                    'DELISTED', 
-                    'SUSPENDED', 
-                    'PENDING_APPROVAL', 
-                    'EXPIRED',
-                    'MATURED'
-                  );
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'identifier_type_enum') THEN
-                  CREATE TYPE identifier_type_enum AS ENUM (
-                    'ISIN',       # International Securities Identification Number
-                    'CUSIP',      # Committee on Uniform Securities Identification Procedures
-                    'SEDOL',      # Stock Exchange Daily Official List
-                    'FIGI',       # Financial Instrument Global Identifier (OpenFIGI)
-                    'TICKER_SYMBOL', # Stock symbol used by exchanges
-                    'EXCHANGE_SYMBOL', # Symbol specific to a particular exchange
-                    'BBG_TICKER', # Bloomberg Ticker
-                    'RIC',        # Reuters Instrument Code
-                    'INTERNAL',   # Proprietary internal identifier
-                    'OTHER'
-                  );
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
+        - createType:
+            typeName: asset_class_enum
+            values:
+              - value: EQUITY
+              - value: FIXED_INCOME
+              - value: DERIVATIVE
+              - value: FX
+              - value: COMMODITY
+              - value: MUTUAL_FUND
+              - value: ETF
+              - value: REAL_ESTATE
+              - value: PRIVATE_EQUITY
+              - value: OTHER
+            remarks: "Type for asset classes"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: asset_class_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: instrument_status_enum
+            values:
+              - value: ACTIVE
+              - value: INACTIVE
+              - value: DELISTED
+              - value: SUSPENDED
+              - value: PENDING_APPROVAL
+              - value: EXPIRED
+              - value: MATURED
+            remarks: "Type for instrument statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: instrument_status_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: identifier_type_enum
+            values:
+              - value: ISIN # International Securities Identification Number
+              - value: CUSIP # Committee on Uniform Securities Identification Procedures
+              - value: SEDOL # Stock Exchange Daily Official List
+              - value: FIGI # Financial Instrument Global Identifier (OpenFIGI)
+              - value: TICKER_SYMBOL # Stock symbol used by exchanges
+              - value: EXCHANGE_SYMBOL # Symbol specific to a particular exchange
+              - value: BBG_TICKER # Bloomberg Ticker
+              - value: RIC # Reuters Instrument Code
+              - value: INTERNAL # Proprietary internal identifier
+              - value: OTHER
+            remarks: "Type for instrument identifier types"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: identifier_type_enum
+                      schemaName: public # Or your specific schema

@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_derivative_details_table_026
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - createTable:
             tableName: derivative_details

@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_settlement_instructions_table_031
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - createTable:
             tableName: settlement_instructions

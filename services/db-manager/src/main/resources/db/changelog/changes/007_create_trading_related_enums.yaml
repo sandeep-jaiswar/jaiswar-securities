@@ -1,126 +1,244 @@
 databaseChangeLog:
   - changeSet:
-      id: create_trading_related_enums_007_rev1
-      author: gemini-idx-assistant
+      id: create_trading_related_enums_007_rev1 # Important: ID remains unchanged
+      author: sandeep-jaiswar
       changes:
+        - createType:
+            typeName: market_data_type_enum
+            values:
+              - value: TRADE
+              - value: QUOTE
+              - value: BID
+              - value: ASK
+              - value: MIDPOINT
+              - value: TRADING_SESSION_HIGH_PRICE
+              - value: TRADING_SESSION_LOW_PRICE
+              - value: TRADE_VOLUME
+              - value: OPEN_INTEREST
+              - value: EMPTY_BOOK
+              - value: SECURITY_STATUS
+              - value: OPENING_PRICE
+              - value: CLOSING_PRICE
+              - value: SETTLEMENT_PRICE
+            remarks: "Type for market data categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: market_data_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: order_type_enum
+            values:
+              - value: MARKET
+              - value: LIMIT
+              - value: STOP
+              - value: STOP_LIMIT
+              - value: MARKET_ON_CLOSE
+              - value: LIMIT_ON_CLOSE
+              - value: PEGGED
+              - value: MARKET_WITH_LEFTOVER_AS_LIMIT
+              - value: PREVIOUSLY_QUOTED
+              - value: PREVIOUSLY_INDICATED
+              - value: FOREX_MARKET
+              - value: FOREX_LIMIT
+              - value: FOREX_SWAP
+              - value: FOREX_PREVIOUSLY_QUOTED
+              - value: FUNARI
+              - value: MARKET_IF_TOUCHED
+              - value: STOP_LOSS_LIMIT
+            remarks: "Type for order types"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: order_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: order_status_enum
+            values:
+              - value: NEW
+              - value: PARTIALLY_FILLED
+              - value: FILLED
+              - value: DONE_FOR_DAY
+              - value: CANCELED
+              - value: REPLACED
+              - value: PENDING_CANCEL
+              - value: STOPPED
+              - value: REJECTED
+              - value: SUSPENDED
+              - value: PENDING_NEW
+              - value: CALCULATED
+              - value: EXPIRED
+              - value: ACCEPTED_FOR_BIDDING
+              - value: PENDING_REPLACE
+              - value: UNKNOWN
+            remarks: "Type for order statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: order_status_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: order_side_enum
+            values:
+              - value: BUY
+              - value: SELL
+              - value: SELL_SHORT
+              - value: SELL_SHORT_EXEMPT
+              - value: BUY_TO_COVER
+              - value: CROSS
+              - value: CROSS_SHORT
+              - value: AS_DEFINED
+              - value: OPPOSITE
+            remarks: "Type for order sides"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: order_side_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: time_in_force_enum
+            values:
+              - value: DAY
+              - value: GTC
+              - value: OPG
+              - value: IOC
+              - value: FOK
+              - value: GTX
+              - value: GTD
+              - value: AUC
+              - value: FILL_OR_KILL
+              - value: GOOD_THRU_DATE
+            remarks: "Type for time in force values for orders"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: time_in_force_enum
+                      schemaName: public # Or your specific schema
+        # The exec_type_enum requires special handling due to the DROP TYPE statement.
+        # This is a simplified conversion. In a production environment, altering an existing enum requires careful consideration of data and dependencies.
         - sql:
             sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'market_data_type_enum') THEN
-                CREATE TYPE market_data_type_enum AS ENUM (
-                  'TRADE', 'QUOTE', 'BID', 'ASK', 'MIDPOINT', 'TRADING_SESSION_HIGH_PRICE', 'TRADING_SESSION_LOW_PRICE', 
-                  'TRADE_VOLUME', 'OPEN_INTEREST', 'EMPTY_BOOK', 'SECURITY_STATUS', 
-                  'OPENING_PRICE', 'CLOSING_PRICE', 'SETTLEMENT_PRICE' 
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_type_enum') THEN
-                CREATE TYPE order_type_enum AS ENUM (
-                  'MARKET', 'LIMIT', 'STOP', 'STOP_LIMIT', 'MARKET_ON_CLOSE', 'LIMIT_ON_CLOSE', 
-                  'PEGGED', 'MARKET_WITH_LEFTOVER_AS_LIMIT', 'PREVIOUSLY_QUOTED', 'PREVIOUSLY_INDICATED',
-                  'FOREX_MARKET', 'FOREX_LIMIT', 'FOREX_SWAP', 'FOREX_PREVIOUSLY_QUOTED', 'FUNARI', 
-                  'MARKET_IF_TOUCHED', 'STOP_LOSS_LIMIT' 
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status_enum') THEN
-                CREATE TYPE order_status_enum AS ENUM (
-                  'NEW', 'PARTIALLY_FILLED', 'FILLED', 'DONE_FOR_DAY', 'CANCELED', 'REPLACED', 
-                  'PENDING_CANCEL', 'STOPPED', 'REJECTED', 'SUSPENDED', 'PENDING_NEW', 'CALCULATED', 
-                  'EXPIRED', 'ACCEPTED_FOR_BIDDING', 'PENDING_REPLACE', 'UNKNOWN'
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_side_enum') THEN
-                CREATE TYPE order_side_enum AS ENUM (
-                  'BUY', 'SELL', 'SELL_SHORT', 'SELL_SHORT_EXEMPT', 'BUY_TO_COVER', 
-                  'CROSS', 'CROSS_SHORT', 'AS_DEFINED', 'OPPOSITE'
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'time_in_force_enum') THEN
-                CREATE TYPE time_in_force_enum AS ENUM (
-                  'DAY', 'GTC', 'OPG', 'IOC', 'FOK', 'GTX', 'GTD', 'AUC', 'FILL_OR_KILL', 'GOOD_THRU_DATE'
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN 
+              DO $$ BEGIN
                 IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'exec_type_enum') THEN
-                  -- Add new values to existing enum if necessary, or drop and recreate if simpler and no data loss risk
-                  -- For simplicity here, assuming we can recreate if it's a fresh setup or controlled environment
-                  -- In a live system, ALTER TYPE ... ADD VALUE IF NOT EXISTS would be used carefully.
-                  DROP TYPE exec_type_enum CASCADE; -- Use with caution, CASCADE drops dependent objects
+                  DROP TYPE exec_type_enum CASCADE; -- Ensure this is safe for your environment
                 END IF;
-                CREATE TYPE exec_type_enum AS ENUM (
-                  'NEW',                          -- 0 - Order acknowledged
-                  'PARTIALLY_FILLED',             -- 1 - Partial fill (often OrdStatus is PARTIALLY_FILLED)
-                  'FILLED',                       -- 2 - Full fill (often OrdStatus is FILLED)
-                  'DONE_FOR_DAY',                 -- 3 - Order valid for day is done
-                  'CANCELED',                     -- 4 - Order canceled
-                  'REPLACED',                     -- 5 - Order replaced
-                  'PENDING_CANCEL',             -- 6 - Cancel request is pending
-                  'STOPPED',                      -- 7 - Order stopped by exchange
-                  'REJECTED',                     -- 8 - Order rejected
-                  'SUSPENDED',                    -- 9 - Order suspended
-                  'PENDING_NEW',                  -- A - Pending new order acknowledgement
-                  'CALCULATED',                   -- B - Order calculated (e.g. VWAP)
-                  'EXPIRED',                      -- C - Order expired
-                  'RESTATED',                     -- D - Order restated (e.g. price change on GTC)
-                  'PENDING_REPLACE',              -- E - Replace request is pending
-                  'TRADE',                        -- F - Actual execution report for a fill/partial fill
-                  'TRADE_CORRECT',                -- G - Corrected trade execution report
-                  'TRADE_CANCEL',                 -- H - Canceled trade execution report
-                  'ORDER_STATUS',                 -- I - Response to an Order Status Request message
-                  'TRADE_IN_A_CLEARING_HOLD',     -- J - Trade is in a clearing hold
-                  'TRADE_HAS_BEEN_RELEASED_TO_CLEARING', -- K - Trade released to clearing
-                  'TRIGGERED_OR_ACTIVATED_BY_SYSTEM' -- L - Order has been triggered or activated by a system
-                );
               END $$;
             dbms: postgresql
             splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'trade_report_type_enum') THEN
-                CREATE TYPE trade_report_type_enum AS ENUM (
-                  'SUBMIT', 'ALLEGED', 'ACCEPT', 'DECLINE', 'ADDENDUM', 'NO_WAS', 'TRADE_REPORT_CANCEL', 
-                  'LOCKED_IN', 'DEFAULTED', 'INVALID_CMTA', 'PENDED_VERIFY', 'REJECTED', 
-                  'TRADE_BREAK', 'VERIFIED'
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'trade_status_internal_enum') THEN
-                CREATE TYPE trade_status_internal_enum AS ENUM (
-                  'PENDING_VALIDATION', 'PENDING_CLEARING', 'PENDING_SETTLEMENT', 'SETTLED', 'CANCELED', 
-                  'ALLOCATED', 'FAILED_SETTLEMENT', 'REJECTED_BY_CLEARING', 'REJECTED_BY_COUNTERPARTY'
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'position_type_enum') THEN
-                CREATE TYPE position_type_enum AS ENUM (
-                  'INTRADAY', 'OVERNIGHT', 'SETTLED', 'PENDING_RECEIPT', 'PENDING_DELIVERY', 
-                  'START_OF_DAY', 'END_OF_DAY'
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'price_type_enum') THEN
-                CREATE TYPE price_type_enum AS ENUM (
-                  'PERCENTAGE', 'PER_UNIT', 'FIXED_AMOUNT', 'DISCOUNT', 'PREMIUM', 'SPREAD', 'TED_PRICE', 
-                  'TED_YIELD', 'YIELD', 'FIXED_CABINET_TRADE_PRICE', 'VARIABLE_CABINET_TRADE_PRICE'
-                ); END IF; END $$;
-            dbms: postgresql
-            splitStatements: false
+        - createType:
+            typeName: exec_type_enum
+            values:
+              - value: NEW
+              - value: PARTIALLY_FILLED
+              - value: FILLED
+              - value: DONE_FOR_DAY
+              - value: CANCELED
+              - value: REPLACED
+              - value: PENDING_CANCEL
+              - value: STOPPED
+              - value: REJECTED
+              - value: SUSPENDED
+              - value: PENDING_NEW
+              - value: CALCULATED
+              - value: EXPIRED
+              - value: RESTATED
+              - value: PENDING_REPLACE
+              - value: TRADE
+              - value: TRADE_CORRECT
+              - value: TRADE_CANCEL
+              - value: ORDER_STATUS
+              - value: TRADE_IN_A_CLEARING_HOLD
+              - value: TRADE_HAS_BEEN_RELEASED_TO_CLEARING
+              - value: TRIGGERED_OR_ACTIVATED_BY_SYSTEM
+            remarks: "Type for execution report types"
+            preConditions:
+              - onFail: MARK_RAN
+              # This precondition is tricky because we drop the type first if it exists.
+              # For a new type, this would be: - not: [ { typeExists: { typeName: exec_type_enum, schemaName: public } } ]
+              # However, since we conditionally drop it, the createType will only run if it doesn't exist (after potential drop).
+        - createType:
+            typeName: trade_report_type_enum
+            values:
+              - value: SUBMIT
+              - value: ALLEGED
+              - value: ACCEPT
+              - value: DECLINE
+              - value: ADDENDUM
+              - value: NO_WAS
+              - value: TRADE_REPORT_CANCEL
+              - value: LOCKED_IN
+              - value: DEFAULTED
+              - value: INVALID_CMTA
+              - value: PENDED_VERIFY
+              - value: REJECTED
+              - value: TRADE_BREAK
+              - value: VERIFIED
+            remarks: "Type for trade report types"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: trade_report_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: trade_status_internal_enum
+            values:
+              - value: PENDING_VALIDATION
+              - value: PENDING_CLEARING
+              - value: PENDING_SETTLEMENT
+              - value: SETTLED
+              - value: CANCELED
+              - value: ALLOCATED
+              - value: FAILED_SETTLEMENT
+              - value: REJECTED_BY_CLEARING
+              - value: REJECTED_BY_COUNTERPARTY
+            remarks: "Type for internal trade statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: trade_status_internal_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: position_type_enum
+            values:
+              - value: INTRADAY
+              - value: OVERNIGHT
+              - value: SETTLED
+              - value: PENDING_RECEIPT
+              - value: PENDING_DELIVERY
+              - value: START_OF_DAY
+              - value: END_OF_DAY
+            remarks: "Type for position types"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: position_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: price_type_enum
+            values:
+              - value: PERCENTAGE
+              - value: PER_UNIT
+              - value: FIXED_AMOUNT
+              - value: DISCOUNT
+              - value: PREMIUM
+              - value: SPREAD
+              - value: TED_PRICE
+              - value: TED_YIELD
+              - value: YIELD
+              - value: FIXED_CABINET_TRADE_PRICE
+              - value: VARIABLE_CABINET_TRADE_PRICE
+            remarks: "Type for price types"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: price_type_enum
+                      schemaName: public # Or your specific schema

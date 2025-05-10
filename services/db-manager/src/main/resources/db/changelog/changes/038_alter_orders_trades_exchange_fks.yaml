@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: alter_orders_trades_exchange_fks_038
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         # Orders table
         - addColumn:

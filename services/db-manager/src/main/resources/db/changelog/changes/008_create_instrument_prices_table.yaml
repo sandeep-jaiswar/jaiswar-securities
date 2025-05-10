@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_instrument_prices_table_008
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       # This table is designed to store time-series price data (ticks or bars).
       # For high-volume data, consider PostgreSQL partitioning (e.g., by instrument_id and/or timestamp range).
       # Liquibase can manage partitions, but the specific strategy depends on query patterns.

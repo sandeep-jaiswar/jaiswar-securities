@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: alter_instruments_add_issuer_fk_027
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - addColumn:
             tableName: instruments

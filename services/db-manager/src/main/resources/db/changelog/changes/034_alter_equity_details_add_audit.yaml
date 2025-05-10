@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: alter_equity_details_add_audit_034
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - addColumn:
             tableName: equity_details

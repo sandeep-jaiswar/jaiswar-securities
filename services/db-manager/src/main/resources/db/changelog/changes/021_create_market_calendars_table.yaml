@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_market_calendars_table_021
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - createTable:
             tableName: market_calendars

@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_allocations_table_030
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - createTable:
             tableName: allocations

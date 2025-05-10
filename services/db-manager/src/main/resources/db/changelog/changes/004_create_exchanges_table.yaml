@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_exchanges_table_004
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - createTable:
             tableName: exchanges

@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: alter_orders_add_created_by_037
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - addColumn:
             tableName: orders

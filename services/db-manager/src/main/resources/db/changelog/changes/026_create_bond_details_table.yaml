@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_bond_details_table_025
-      author: gemini-idx-assistant
+      author: sandeep-jaiswar
       changes:
         - createTable:
             tableName: bond_details

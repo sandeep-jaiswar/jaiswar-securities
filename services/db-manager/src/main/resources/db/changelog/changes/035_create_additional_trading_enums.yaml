@@ -1,31 +1,34 @@
 databaseChangeLog:
   - changeSet:
-      id: create_additional_trading_enums_035
-      author: gemini-idx-assistant
+      id: create_additional_trading_enums_035 # Important: ID remains unchanged
+      author: sandeep-jaiswar
       changes:
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'commission_type_enum') THEN
-                  CREATE TYPE commission_type_enum AS ENUM (
-                    'PER_UNIT',
-                    'PERCENTAGE',
-                    'ABSOLUTE',
-                    'PERCENTAGE_WAIVED_CASH_DISCOUNT',
-                    'PERCENTAGE_WAIVED_ENHANCED_UNITS',
-                    'POINTS_PER_BOND_OR_CONTRACT',
-                    'OTHER'
-                  );
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
-        - sql:
-            sql: |
-              DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_direction_enum') THEN
-                  CREATE TYPE transaction_direction_enum AS ENUM ('DEBIT', 'CREDIT');
-                END IF;
-              END $$;
-            dbms: postgresql
-            splitStatements: false
+        - createType:
+            typeName: commission_type_enum
+            values:
+              - value: PER_UNIT
+              - value: PERCENTAGE
+              - value: ABSOLUTE
+              - value: PERCENTAGE_WAIVED_CASH_DISCOUNT
+              - value: PERCENTAGE_WAIVED_ENHANCED_UNITS
+              - value: POINTS_PER_BOND_OR_CONTRACT
+              - value: OTHER
+            remarks: "Type for commission calculation methods"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: commission_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: transaction_direction_enum
+            values:
+              - value: DEBIT
+              - value: CREDIT
+            remarks: "Type for transaction direction (Debit/Credit)"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: transaction_direction_enum
+                      schemaName: public # Or your specific schema
