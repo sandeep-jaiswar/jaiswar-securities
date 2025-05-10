@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -19,44 +20,55 @@ jobs:
       - name: Setup Bazelisk (Bazel version manager)
         uses: bazelbuild/setup-bazelisk@v1
 
-      - name: Ensure Cache Path Exists
+      - name: Get Bazel Output Base Path
+        id: bazel-path
         run: |
-          mkdir -p ~/.cache/bazel
+          echo "path=$(bazel info output_base)" >> "$GITHUB_OUTPUT"
 
       - name: Restore Bazel Cache
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/bazel
+          path: ${{ steps.bazel-path.outputs.path }}
           key: bazel-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             bazel-${{ runner.os }}-
 
-      - name: Debug Cache
-        run: |
-          echo "Cache key: bazel-${{ runner.os }}-${{ github.sha }}"
-          ls -la ~/.cache/bazel || echo "Cache directory does not exist or is empty."
+      - name: Inject BuildBuddy Remote Cache Key (if set)
+        if: env.BUILDBUDDY_API_KEY != ''
+        run: echo "build --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY}" >> .bazelrc
 
       - name: Determine changed targets
         id: changes
         run: |
-          CHANGED_FILES=$(git diff --name-only origin/main | sed 's|^|//|' | paste -sd ' ')
-          echo "CHANGED=$(bazel query \"kind('.*', rdeps(//..., set($CHANGED_FILES)))\" || echo '')" >> $GITHUB_ENV
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | sed 's|^|//|' | paste -sd ' ')
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changed files."
+            echo "CHANGED=" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          echo "Changed files: $CHANGED_FILES"
+          CHANGED_TARGETS=$(bazel query "kind('.*', rdeps(//..., set($CHANGED_FILES)))" || echo "")
+          echo "CHANGED=$CHANGED_TARGETS" >> $GITHUB_ENV
+
       - name: Build Changed Targets
         if: env.CHANGED != ''
         run: |
+          echo "Building changed targets..."
           bazel build $CHANGED
 
       - name: Test Changed Targets
         if: env.CHANGED != ''
         run: |
+          echo "Testing changed targets..."
           bazel test $CHANGED --test_output=errors
 
       - name: Upload Test Logs on Failure
         if: failure()
         run: |
           if [ -d bazel-testlogs ]; then
-            find bazel-testlogs -name "test.log" -exec cat {} \;
+            echo "Dumping failed test logs:"
+            find bazel-testlogs -name "test.log" -exec echo "::group::{}" \; -exec cat {} \; -exec echo "::endgroup::" \;
           else
             echo "No test logs to upload."
           fi
