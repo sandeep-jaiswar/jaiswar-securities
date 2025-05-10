@@ -1,0 +1,50 @@
+name: Bazel CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  bazel:
+    name: Bazel Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Bazel
+        uses: bazelbuild/setup-bazel@v4
+        with:
+          bazelisk-cache: true
+
+      - name: Restore Bazel Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+          key: bazel-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            bazel-${{ runner.os }}-
+
+      - name: Determine changed targets
+        id: changes
+        run: |
+          echo "CHANGED=$(bazel query 'kind(".*", rdeps(//..., set($(git diff --name-only origin/main | sed "s|^|//|" | paste -sd " " -))))' || echo '')" >> $GITHUB_ENV
+
+      - name: Build Changed Targets
+        if: env.CHANGED != ''
+        run: |
+          bazel build $CHANGED
+
+      - name: Test Changed Targets
+        if: env.CHANGED != ''
+        run: |
+          bazel test $CHANGED --test_output=errors
+
+      - name: Upload Test Logs on Failure
+        if: failure()
+        run: |
+          find bazel-testlogs -name "test.log" -exec cat {} \;
