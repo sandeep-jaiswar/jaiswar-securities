@@ -1,0 +1,37 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+load("@rules_jvm_external//:defs.bzl", "artifact")
+
+java_library(
+    name = "cerberus_auth_lib",
+    srcs = glob(["src/main/java/**/*.java"]),
+    deps = [
+        artifact("org.springframework.boot:spring-boot-starter-web"),
+        artifact("org.springframework.boot:spring-boot-starter-security"),
+        artifact("org.springframework.boot:spring-boot-starter-validation"),
+        artifact("io.jsonwebtoken:jjwt-api"),
+        artifact("io.jsonwebtoken:jjwt-impl"),
+        artifact("io.jsonwebtoken:jjwt-jackson"),
+
+        # Direct dependencies to satisfy strict deps
+        artifact("jakarta.validation:jakarta.validation-api"), # For @Valid annotation direct use
+        artifact("org.springframework.boot:spring-boot-autoconfigure"),
+        artifact("org.springframework.boot:spring-boot"),
+        artifact("org.springframework:spring-context"),
+        artifact("org.springframework.security:spring-security-config"),
+        artifact("org.springframework:spring-beans"),
+        artifact("org.springframework.security:spring-security-crypto"),
+        artifact("org.springframework.security:spring-security-core"),
+        artifact("org.springframework.security:spring-security-web"),
+        artifact("org.springframework:spring-web"),
+        artifact("org.apache.tomcat.embed:tomcat-embed-core"), # For jakarta.servlet
+        artifact("org.springframework:spring-core"),
+        # Add other direct dependencies if new strict deps errors appear
+    ],
+)
+
+java_binary(
+    name = "cerberus_auth_server",
+    main_class = "com.jaiswarsecurities.cerberusauth.CerberusAuthApplication",
+    runtime_deps = [":cerberus_auth_lib"],
+    jvm_flags = ["-Dspring.profiles.active=default"], # Example JVM flag
+)
