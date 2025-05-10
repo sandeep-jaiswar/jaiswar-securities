@@ -35,4 +35,14 @@ databaseChangeLog:
       file: db/changelog/changes/016_create_role_permissions_table.yaml
   - include:
       file: db/changelog/changes/017_create_user_roles_table.yaml
+  - include:
+      file: db/changelog/changes/018_create_reference_data_enums.yaml
+  - include:
+      file: db/changelog/changes/019_create_countries_table.yaml
+  - include:
+      file: db/changelog/changes/020_create_currencies_table.yaml
+  - include:
+      file: db/changelog/changes/021_create_market_calendars_table.yaml
+  - include:
+      file: db/changelog/changes/022_create_trading_holidays_table.yaml
   # Add further table creations or changesets here
