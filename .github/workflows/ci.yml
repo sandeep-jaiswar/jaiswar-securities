@@ -10,7 +10,8 @@ jobs:
   bazel:
     name: Bazel Build & Test
     runs-on: ubuntu-latest
-
+    env:
+      BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -39,8 +40,8 @@ jobs:
       - name: Determine changed targets
         id: changes
         run: |
-          echo "CHANGED=$(bazel query 'kind(".*", rdeps(//..., set($(git diff --name-only origin/main | sed "s|^|//|" | paste -sd " " -))))' || echo '')" >> $GITHUB_ENV
-
+          CHANGED_FILES=$(git diff --name-only origin/main | sed 's|^|//|' | paste -sd ' ')
+          echo "CHANGED=$(bazel query \"kind('.*', rdeps(//..., set($CHANGED_FILES)))\" || echo '')" >> $GITHUB_ENV
       - name: Build Changed Targets
         if: env.CHANGED != ''
         run: |
