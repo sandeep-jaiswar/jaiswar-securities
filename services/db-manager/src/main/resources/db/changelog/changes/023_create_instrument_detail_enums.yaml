@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_instrument_detail_enums_023
+      author: gemini-idx-assistant
+      changes:
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'issuer_type_enum') THEN
+                CREATE TYPE issuer_type_enum AS ENUM ('SOVEREIGN', 'CORPORATE', 'MUNICIPAL', 'SUPRANATIONAL', 'AGENCY');
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'bond_type_enum') THEN
+                CREATE TYPE bond_type_enum AS ENUM (
+                  'GOVERNMENT', 'CORPORATE_FIXED', 'CORPORATE_FLOATING', 'MUNICIPAL', 'CONVERTIBLE', 
+                  'ZERO_COUPON', 'INFLATION_LINKED', 'ASSET_BACKED', 'MORTGAGE_BACKED', 'COVERED_BOND'
+                );
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'coupon_frequency_enum') THEN
+                CREATE TYPE coupon_frequency_enum AS ENUM (
+                  'ANNUAL', 'SEMI_ANNUAL', 'QUARTERLY', 'MONTHLY', 'AT_MATURITY', 'NONE', 'OTHER'
+                );
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'day_count_convention_enum') THEN
+                CREATE TYPE day_count_convention_enum AS ENUM (
+                  'ACT_360', 'ACT_365', 'ACT_365F', 'THIRTY_360', 'ACT_ACT_ISDA', 'ACT_ACT_ICMA', 'EUROBOND_BASIS', 'ONE_ONE'
+                );
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'derivative_type_enum') THEN
+                CREATE TYPE derivative_type_enum AS ENUM ('OPTION', 'FUTURE', 'SWAP', 'FORWARD', 'CFD', 'WARRANT', 'RIGHT');
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'option_type_enum') THEN
+                CREATE TYPE option_type_enum AS ENUM ('CALL', 'PUT');
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'exercise_style_enum') THEN
+                CREATE TYPE exercise_style_enum AS ENUM ('AMERICAN', 'EUROPEAN', 'BERMUDAN', 'CANARY', 'ASIAN');
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'settlement_type_enum') THEN
+                CREATE TYPE settlement_type_enum AS ENUM ('CASH', 'PHYSICAL');
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false

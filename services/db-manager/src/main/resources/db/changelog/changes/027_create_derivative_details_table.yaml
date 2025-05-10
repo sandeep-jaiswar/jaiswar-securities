@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_derivative_details_table_026
+      author: gemini-idx-assistant
+      changes:
+        - createTable:
+            tableName: derivative_details
+            columns:
+              - column:
+                  name: instrument_id # PK and FK to instruments table
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_derivative_details_instrument_id
+                    references: instruments(instrument_id)
+                    onDelete: CASCADE
+              - column:
+                  name: underlying_instrument_id # FK to instruments table (for the underlying asset)
+                  type: UUID
+                  constraints:
+                    # Nullable if derivative isn't directly on another instrument (e.g. index future)
+                    # Or point to a new 'indices' table if needed
+                    foreignKeyName: fk_derivative_underlying_inst_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: contract_size # Multiplier for the derivative
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: option_type # For options: CALL, PUT
+                  type: VARCHAR(10) # Could be an ENUM: option_type_enum ('CALL', 'PUT')
+              - column:
+                  name: strike_price # For options
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: exercise_style # For options: AMERICAN, EUROPEAN, BERMUDAN
+                  type: VARCHAR(20) # Could be an ENUM
+              # instruments.expiration_date (maturity_date) is in the main table
+              - column:
+                  name: settlement_type # e.g., CASH, PHYSICAL
+                  type: VARCHAR(20) # Could be an ENUM
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_derivative_details_created_by
+                    references: users(user_id)
+              - column:
+                  name: updated_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_derivative_details_updated_by
+                    references: users(user_id)
+        - createIndex:
+            indexName: idx_derivative_details_underlying_id
+            tableName: derivative_details
+            columns:
+              - column:
+                  name: underlying_instrument_id
