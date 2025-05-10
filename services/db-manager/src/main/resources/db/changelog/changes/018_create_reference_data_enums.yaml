@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_reference_data_enums_018
+      author: sandeep-jaiswar
+      changes:
+        - createType:
+            typeName: calendar_type_enum
+            values:
+              - value: EXCHANGE_TRADING
+              - value: SETTLEMENT
+              - value: GENERAL_BUSINESS
+              - value: CURRENCY_HOLIDAY
+            remarks: "Type for calendar categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: calendar_type_enum
+                      schemaName: public # Or your specific schema

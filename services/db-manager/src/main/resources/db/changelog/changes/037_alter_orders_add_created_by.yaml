@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter_orders_add_created_by_037
+      author: sandeep-jaiswar
+      changes:
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: created_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_orders_created_by
+                    references: users(user_id)

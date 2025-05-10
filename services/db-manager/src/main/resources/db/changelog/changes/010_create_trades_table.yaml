@@ -1,0 +1,180 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_trades_table_010
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: trades
+            columns:
+              - column:
+                  name: trade_id # Internal unique trade ID
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id # FK to the parent order
+                  type: UUID
+                  constraints:
+                    nullable: false # Assuming every trade must be linked to an order
+                    foreignKeyName: fk_trades_order_id
+                    references: orders(order_id)
+              - column: # This could be the client_order_id or exchange_order_id from the order
+                  name: related_order_identifier 
+                  type: VARCHAR(255)
+              - column:
+                  name: exec_id # FIX Tag 17: ExecID - Unique identifier for this execution report
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true # ExecID should be unique
+                    nullable: false
+              - column:
+                  name: account_id # Account the trade belongs to
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trades_account_id
+                    references: accounts(account_id)
+              - column:
+                  name: instrument_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trades_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: side # FIX Tag 54: Side (copied from order, or could differ for complex execs)
+                  type: order_side_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_quantity # FIX Tag 32: LastQty/LastShares - Quantity of this specific fill
+                  type: NUMERIC(19, 4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_price # FIX Tag 31: LastPx - Price of this specific fill
+                  type: NUMERIC(19, 9)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: average_price # FIX Tag 6: AvgPx - Average price if this fill is part of an average priced group
+                  type: NUMERIC(19, 9)
+                  # Default to 0, can be same as last_price for simple fills. Order table has overall AvgPx.
+              - column:
+                  name: currency_code # FIX Tag 15: Currency
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: commission # FIX Tag 12: Commission
+                  type: NUMERIC(19, 4)
+                  defaultValueNumeric: 0.00
+              - column:
+                  name: commission_type # FIX Tag 13: CommType (e.g., PER_UNIT, PERCENTAGE, ABSOLUTE)
+                  type: VARCHAR(1) # Or an ENUM if preferred. FIX values: 1,2,3,4,5,6
+              - column:
+                  name: commission_currency # Currency of the commission
+                  type: VARCHAR(3)
+              - column:
+                  name: gross_trade_amount # last_quantity * last_price (before commission/fees)
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: net_money # FIX Tag 118: NetMoney (total monetary value of this fill)
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: transaction_time # FIX Tag 60: TransactTime (time of execution)
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: settlement_date # FIX Tag 64: SettlDate
+                  type: DATE
+              - column:
+                  name: trade_date # FIX Tag 75: TradeDate
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: execution_type # FIX Tag 150: ExecType (e.g., TRADE, TRADE_CORRECT, TRADE_CANCEL)
+                  type: exec_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_status # FIX Tag 39: OrdStatus (status of the order after this execution)
+                  type: order_status_enum 
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_market # FIX Tag 30: LastMkt (market of execution)
+                  type: VARCHAR(50) # Could FK to exchanges.exchange_code
+              - column:
+                  name: trade_report_id # FIX Tag 571: TrdRegTimestamp (Regulatory trade report ID) / TrdMatchID (FIX Tag 880)
+                  type: VARCHAR(255)
+              - column:
+                  name: trade_report_type # FIX Tag 856: TradeReportType
+                  type: trade_report_type_enum
+              - column:
+                  name: text # FIX Tag 58: Text
+                  type: TEXT
+              - column:
+                  name: internal_status # For internal post-trade processing (e.g., PENDING_CLEARING, SETTLED)
+                  type: trade_status_internal_enum
+                  defaultValue: "PENDING_VALIDATION"
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: VARCHAR(255)
+              - column:
+                  name: updated_by
+                  type: VARCHAR(255)
+        - createIndex:
+            indexName: idx_trades_exec_id
+            tableName: trades
+            columns:
+              - column:
+                  name: exec_id
+            unique: true
+        - createIndex:
+            indexName: idx_trades_order_id
+            tableName: trades
+            columns:
+              - column:
+                  name: order_id
+        - createIndex:
+            indexName: idx_trades_account_instrument
+            tableName: trades
+            columns:
+              - column:
+                  name: account_id
+              - column:
+                  name: instrument_id
+        - createIndex:
+            indexName: idx_trades_transaction_time
+            tableName: trades
+            columns:
+              - column:
+                  name: transaction_time
+        - createIndex:
+            indexName: idx_trades_trade_date
+            tableName: trades
+            columns:
+              - column:
+                  name: trade_date
+        - createIndex:
+            indexName: idx_trades_internal_status
+            tableName: trades
+            columns:
+              - column:
+                  name: internal_status

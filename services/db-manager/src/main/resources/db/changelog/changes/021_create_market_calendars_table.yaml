@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_market_calendars_table_021
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: market_calendars
+            columns:
+              - column:
+                  name: calendar_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: calendar_code # e.g., NYSE, LSE, US_SETTLEMENT, EUR_SETTLEMENT
+                  type: VARCHAR(50)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: calendar_type
+                  type: calendar_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: default_open_time # e.g., 09:30:00 (in local timezone of market)
+                  type: TIME
+              - column:
+                  name: default_close_time # e.g., 16:00:00
+                  type: TIME
+              - column:
+                  name: timezone # IANA timezone string (e.g., America/New_York, Europe/London)
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: country_code # Optional: country this calendar primarily applies to
+                  type: CHAR(2)
+                  constraints:
+                    foreignKeyName: fk_market_calendars_country_code
+                    references: countries(country_code_iso_alpha2)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_market_calendars_calendar_code
+            tableName: market_calendars
+            columns:
+              - column:
+                  name: calendar_code
+            unique: true
+        - createIndex:
+            indexName: idx_market_calendars_calendar_type
+            tableName: market_calendars
+            columns:
+              - column:
+                  name: calendar_type

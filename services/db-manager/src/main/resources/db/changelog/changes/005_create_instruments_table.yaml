@@ -1,0 +1,119 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_instruments_table_005
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: instruments
+            columns:
+              - column:
+                  name: instrument_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name # Common name of the instrument
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: asset_class
+                  type: asset_class_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency_code # Base currency of the instrument
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false 
+                    # FK to a currencies table could be an option here
+              - column:
+                  name: primary_exchange_id # Optional: main exchange it trades on
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_instruments_primary_exchange_id
+                    references: exchanges(exchange_id)
+              - column:
+                  name: sector # e.g., Technology, Healthcare, Financials
+                  type: VARCHAR(100)
+              - column:
+                  name: industry # e.g., Software, Pharmaceuticals, Banking
+                  type: VARCHAR(100)
+              - column:
+                  name: country_of_issue # ISO 3166-1 alpha-2 country code
+                  type: VARCHAR(2)
+              - column:
+                  name: status
+                  type: instrument_status_enum
+                  defaultValue: "PENDING_APPROVAL"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: issue_date
+                  type: DATE
+              - column:
+                  name: maturity_date # For bonds, options, futures etc.
+                  type: DATE
+              - column:
+                  name: lot_size
+                  type: INTEGER
+                  defaultValueNumeric: 1
+              - column:
+                  name: tick_size
+                  type: NUMERIC(18, 9) # Smallest price increment
+              - column:
+                  name: additional_details # For instrument-specific attributes
+                  type: JSONB 
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: VARCHAR(255)
+              - column:
+                  name: updated_by
+                  type: VARCHAR(255)
+        - createIndex:
+            indexName: idx_instruments_asset_class
+            tableName: instruments
+            columns:
+              - column:
+                  name: asset_class
+        - createIndex:
+            indexName: idx_instruments_status
+            tableName: instruments
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            indexName: idx_instruments_currency_code
+            tableName: instruments
+            columns: 
+              - column:
+                  name: currency_code
+        - createIndex:
+            indexName: idx_instruments_primary_exchange_id
+            tableName: instruments
+            columns:
+              - column:
+                  name: primary_exchange_id
+        - createIndex:
+            indexName: idx_instruments_name
+            tableName: instruments
+            columns:
+              - column:
+                  name: name
+            # For text search on name/description, consider GIN/GIST index with tsvector

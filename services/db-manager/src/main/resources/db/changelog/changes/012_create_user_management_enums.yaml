@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_user_management_enums_012
+      author: sandeep-jaiswar
+      changes:
+        - createType:
+            typeName: user_status_enum
+            values:
+              - value: ACTIVE
+              - value: INACTIVE # User has been deactivated
+              - value: SUSPENDED # User access is temporarily revoked
+              - value: PENDING_VERIFICATION # User has registered but not yet verified
+              - value: LOCKED # User account is locked due to multiple failed attempts etc.
+            remarks: "Type for user account statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: user_status_enum
+                      schemaName: public # Or your specific schema

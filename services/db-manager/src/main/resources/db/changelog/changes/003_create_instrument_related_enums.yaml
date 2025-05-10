@@ -1,0 +1,62 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_instrument_related_enums_003
+      author: sandeep-jaiswar
+      changes:
+        - createType:
+            typeName: asset_class_enum
+            values:
+              - value: EQUITY
+              - value: FIXED_INCOME
+              - value: DERIVATIVE
+              - value: FX
+              - value: COMMODITY
+              - value: MUTUAL_FUND
+              - value: ETF
+              - value: REAL_ESTATE
+              - value: PRIVATE_EQUITY
+              - value: OTHER
+            remarks: "Type for asset classes"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: asset_class_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: instrument_status_enum
+            values:
+              - value: ACTIVE
+              - value: INACTIVE
+              - value: DELISTED
+              - value: SUSPENDED
+              - value: PENDING_APPROVAL
+              - value: EXPIRED
+              - value: MATURED
+            remarks: "Type for instrument statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: instrument_status_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: identifier_type_enum
+            values:
+              - value: ISIN # International Securities Identification Number
+              - value: CUSIP # Committee on Uniform Securities Identification Procedures
+              - value: SEDOL # Stock Exchange Daily Official List
+              - value: FIGI # Financial Instrument Global Identifier (OpenFIGI)
+              - value: TICKER_SYMBOL # Stock symbol used by exchanges
+              - value: EXCHANGE_SYMBOL # Symbol specific to a particular exchange
+              - value: BBG_TICKER # Bloomberg Ticker
+              - value: RIC # Reuters Instrument Code
+              - value: INTERNAL # Proprietary internal identifier
+              - value: OTHER
+            remarks: "Type for instrument identifier types"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: identifier_type_enum
+                      schemaName: public # Or your specific schema

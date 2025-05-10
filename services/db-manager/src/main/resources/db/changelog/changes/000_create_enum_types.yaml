@@ -1,0 +1,80 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_enum_types_000
+      author: sandeep-jaiswar
+      changes:
+        - createType:
+            typeName: client_type_enum
+            values:
+              - value: INDIVIDUAL
+              - value: INSTITUTIONAL
+              - value: CORPORATE
+            remarks: "Type for client categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: client_type_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: kyc_status_enum
+            values:
+              - value: PENDING
+              - value: VERIFIED
+              - value: REJECTED
+              - value: EXPIRED
+              - value: IN_REVIEW
+            remarks: "Type for KYC (Know Your Customer) statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: kyc_status_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: aml_risk_rating_enum
+            values:
+              - value: LOW
+              - value: MEDIUM
+              - value: HIGH
+              - value: CRITICAL
+            remarks: "Type for AML (Anti-Money Laundering) risk ratings"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: aml_risk_rating_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: record_status_enum
+            values:
+              - value: ACTIVE
+              - value: INACTIVE
+              - value: SUSPENDED
+              - value: PENDING_ACTIVATION
+              - value: CLOSED
+              - value: ARCHIVED
+            remarks: "Generic type for record statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: record_status_enum
+                      schemaName: public # Or your specific schema
+        - createType:
+            typeName: account_type_enum
+            values:
+              - value: TRADING
+              - value: MARGIN
+              - value: CASH
+              - value: CUSTODIAL
+              - value: SETTLEMENT
+              - value: INTERNAL_HOUSE
+            remarks: "Type for account categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: account_type_enum
+                      schemaName: public # Or your specific schema
+      # Using Liquibase <createType> with preConditions for robust ENUM creation

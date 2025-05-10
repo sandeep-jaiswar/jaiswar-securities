@@ -1,0 +1,104 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_market_data_table_008
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: market_data
+            columns:
+              - column:
+                  name: market_data_id
+                  type: BIGSERIAL # High frequency data, serial might be better than UUID here if scoped to this table
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: instrument_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_market_data_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: exchange_id # Exchange where the data originated, if applicable
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_market_data_exchange_id
+                    references: exchanges(exchange_id)
+              - column:
+                  name: data_type
+                  type: market_data_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp # Time of the data point (e.g., trade time, quote time)
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: NUMERIC(19, 9) # High precision for prices
+              - column:
+                  name: volume
+                  type: BIGINT
+              - column:
+                  name: bid_price
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: bid_size
+                  type: BIGINT
+              - column:
+                  name: ask_price
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: ask_size
+                  type: BIGINT
+              - column:
+                  name: sequence_number # Optional: from market data feed for ordering/gap detection
+                  type: BIGINT
+              - column:
+                  name: source_timestamp # When the event occurred at the source
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: received_timestamp # When the event was received by our system
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+              - column:
+                  name: additional_details # For extra fields, e.g. quote conditions, trade conditions
+                  type: JSONB
+        - createIndex:
+            indexName: idx_market_data_instrument_timestamp
+            tableName: market_data
+            columns:
+              - column:
+                  name: instrument_id
+              - column:
+                  name: timestamp
+              - column:
+                  name: data_type
+            # This is a crucial index for time-series queries
+        - createIndex:
+            indexName: idx_market_data_instrument_id_data_type_ts_desc
+            tableName: market_data
+            columns:
+              - column:
+                  name: instrument_id
+              - column:
+                  name: data_type
+              - column:
+                  name: timestamp
+                  descending: true # For getting latest data quickly
+        - createIndex:
+            indexName: idx_market_data_exchange_id
+            tableName: market_data
+            columns:
+              - column:
+                  name: exchange_id
+        - createIndex:
+            indexName: idx_market_data_timestamp
+            tableName: market_data
+            columns:
+              - column:
+                  name: timestamp
+            # Consider TimescaleDB or partitioning for very high volume market data

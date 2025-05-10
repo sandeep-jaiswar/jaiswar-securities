@@ -1,0 +1,79 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_bond_details_table_025
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: bond_details
+            columns:
+              - column:
+                  name: instrument_id # PK and FK to instruments table
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_bond_details_instrument_id
+                    references: instruments(instrument_id)
+                    onDelete: CASCADE
+              - column:
+                  name: coupon_rate # Annual coupon rate (percentage)
+                  type: NUMERIC(10, 4)
+              - column:
+                  name: coupon_frequency # e.g., SEMI_ANNUALLY, ANNUALLY, QUARTERLY, MONTHLY
+                  type: VARCHAR(50)
+              - column:
+                  name: next_coupon_date
+                  type: DATE
+              - column:
+                  name: last_coupon_date
+                  type: DATE
+              - column:
+                  name: face_value # Par value or principal amount per bond
+                  type: NUMERIC(19, 4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: issue_price # Price at which the bond was issued
+                  type: NUMERIC(10, 4) # Percentage of face value or actual price
+              # instruments.issue_date and instruments.maturity_date are already in the main table
+              - column:
+                  name: bond_type # e.g., GOVERNMENT, CORPORATE, MUNICIPAL, ZERO_COUPON, CONVERTIBLE
+                  type: VARCHAR(100)
+              - column:
+                  name: day_count_convention # e.g., 30/360, ACT/360, ACT/ACT
+                  type: VARCHAR(50)
+              - column:
+                  name: accrued_interest_calculation_method
+                  type: VARCHAR(100)
+              - column:
+                  name: callable_flag
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: putable_flag
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_bond_details_created_by
+                    references: users(user_id)
+              - column:
+                  name: updated_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_bond_details_updated_by
+                    references: users(user_id)
