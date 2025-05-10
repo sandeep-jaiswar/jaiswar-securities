@@ -7,10 +7,24 @@ java_library(
     deps = [
         artifact("org.springframework.boot:spring-boot-starter-web"),
         artifact("org.springframework.boot:spring-boot-starter-security"),
+        artifact("org.springframework.boot:spring-boot-starter-validation"), # For @Valid
         artifact("io.jsonwebtoken:jjwt-api"),
         artifact("io.jsonwebtoken:jjwt-impl"),
         artifact("io.jsonwebtoken:jjwt-jackson"),
-        # Add other dependencies as needed
+
+        # Direct dependencies to satisfy strict deps
+        artifact("org.springframework.boot:spring-boot-autoconfigure"),
+        artifact("org.springframework.boot:spring-boot"),
+        artifact("org.springframework:spring-context"),
+        artifact("org.springframework.security:spring-security-config"),
+        artifact("org.springframework:spring-beans"),
+        artifact("org.springframework.security:spring-security-crypto"),
+        artifact("org.springframework.security:spring-security-core"),
+        artifact("org.springframework.security:spring-security-web"),
+        artifact("org.springframework:spring-web"),
+        artifact("org.apache.tomcat.embed:tomcat-embed-core"), # For jakarta.servlet
+        artifact("org.springframework:spring-core"),
+        # Add other direct dependencies if new strict deps errors appear
     ],
 )
 
@@ -20,22 +34,3 @@ java_binary(
     runtime_deps = [":cerberus_auth_lib"],
     jvm_flags = ["-Dspring.profiles.active=default"], # Example JVM flag
 )
-
-# You might need to configure rules_jvm_external in your WORKSPACE or MODULE.bazel file
-# to fetch these artifacts from Maven.
-# Example (for MODULE.bazel with bzlmod):
-#
-# maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
-# maven.install(
-#     artifacts = [
-#         "org.springframework.boot:spring-boot-starter-web:3.1.5", # Replace with desired version
-#         "org.springframework.boot:spring-boot-starter-security:3.1.5", # Replace with desired version
-#         "io.jsonwebtoken:jjwt-api:0.11.5", # Replace with desired version
-#         "io.jsonwebtoken:jjwt-impl:0.11.5", # Replace with desired version
-#         "io.jsonwebtoken:jjwt-jackson:0.11.5", # Replace with desired version
-#     ],
-#     repositories = [
-#         "https://repo1.maven.org/maven2",
-#     ],
-# )
-# use_repo(maven, "maven")
