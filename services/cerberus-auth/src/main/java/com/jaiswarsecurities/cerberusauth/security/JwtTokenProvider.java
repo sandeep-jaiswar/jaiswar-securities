@@ -1,9 +1,16 @@
 package com.jaiswarsecurities.cerberusauth.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -17,23 +24,40 @@ import java.util.function.Function;
 @Component
 public class JwtTokenProvider {
 
-    // IMPORTANT: Keep this secret secure! In a real app, load it from properties/env variables.
-    private final SecretKey jwtSecret = Keys.secretKeyFor(SignatureAlgorithm.HS512); // Generates a secure key
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    private final long jwtExpirationInMs = 86400000; // 24 hours
+    @Value("${app.jwt.secret}")
+    private String jwtSecretString;
 
-    // Generate token from UserDetails
+    @Value("${app.jwt.expiration-ms}")
+    private long jwtExpirationInMs;
+
+    private SecretKey jwtSecret;
+
+    @PostConstruct
+    public void init() {
+        if (jwtSecretString == null || jwtSecretString.trim().isEmpty()) {
+            logger.error("JWT secret key is not configured. Please set app.jwt.secret property.");
+            throw new IllegalArgumentException("JWT secret key is not configured.");
+        }
+        // Ensure the secret key is strong enough for HS512. 
+        // A common recommendation is at least 64 bytes (512 bits) for HS512.
+        // For production, generate this string securely and store it appropriately.
+        if (jwtSecretString.getBytes().length < 64 && "your-super-secret-and-long-random-string-that-is-at-least-512-bits-long-for-hs512".equals(jwtSecretString)) {
+             logger.warn("Using a default weak JWT secret. THIS IS NOT SECURE FOR PRODUCTION. Please configure a strong app.jwt.secret.");
+        }
+        this.jwtSecret = Keys.hmacShaKeyFor(jwtSecretString.getBytes());
+    }
+
     public String generateToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
         return generateToken(userPrincipal.getUsername());
     }
 
-    // Generate token from username
     public String generateToken(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
         Map<String, Object> claims = new HashMap<>();
-        // You can add more claims here if needed (e.g., roles, authorities)
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -44,20 +68,24 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Get username from JWT token
     public String getUsernameFromJWT(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    // Validate token
     public boolean validateToken(String authToken) {
         try {
             Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(authToken);
             return true;
-        } catch (Exception ex) {
-            // Log a warning or error, e.g., MalformedJwtException, ExpiredJwtException, etc.
-            // For simplicity, we're just returning false here.
-            System.err.println("JWT validation error: " + ex.getMessage());
+        } catch (MalformedJwtException ex) {
+            logger.error("Invalid JWT token: {}", ex.getMessage());
+        } catch (ExpiredJwtException ex) {
+            logger.error("Expired JWT token: {}", ex.getMessage());
+        } catch (UnsupportedJwtException ex) {
+            logger.error("Unsupported JWT token: {}", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            logger.error("JWT claims string is empty: {}", ex.getMessage());
+        } catch (Exception ex) { // Catch any other potential exceptions related to JWT parsing
+            logger.error("JWT validation error: {}", ex.getMessage());
         }
         return false;
     }
@@ -67,7 +95,6 @@ public class JwtTokenProvider {
         return claimsResolver.apply(claims);
     }
 
-    // For retrieving any information from token we will need the secret key
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(jwtSecret)
@@ -77,13 +104,20 @@ public class JwtTokenProvider {
     }
 
     private Boolean isTokenExpired(String token) {
-        final Date expiration = getClaimFromToken(token, Claims::getExpiration);
-        return expiration.before(new Date());
+        try {
+            final Date expiration = getClaimFromToken(token, Claims::getExpiration);
+            return expiration.before(new Date());
+        } catch (ExpiredJwtException ex) { // If already expired, getExpiration might throw this
+            return true;
+        }
     }
 
-    // You might want a more specific validation that checks expiration separately
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromJWT(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            final String username = getUsernameFromJWT(token);
+            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (Exception e) { // Any error during parsing or claim extraction means invalid
+            return false;
+        }
     }
 }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2-add-initial-roles" author="cerberus-auth-dev">
+        <insert tableName="roles">
+            <column name="name" value="ROLE_USER"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="ROLE_TRADER_EQUITIES"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="ROLE_COMPLIANCE_OFFICER"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3-add-initial-user" author="cerberus-auth-dev">
+        <!-- 
+            Password: "password" 
+            BCrypt Hash (example, generate your own!): $2a$10$abcdefghijklmnopqrstuv 
+            You MUST replace '$2a$10$YOUR_BCRYPT_HASH_FOR_PASSWORD_HERE' with an actual BCrypt hash.
+            To generate one: 
+            1. Temporarily add this to any Spring component: 
+               @Autowired PasswordEncoder pe; 
+               @PostConstruct public void init() { System.out.println("HASH: " + pe.encode("password")); }
+            2. Run the app, get the hash from console.
+            3. Remove temporary code.
+        -->
+        <insert tableName="users">
+            <column name="username" value="testuser"/>
+            <column name="password" value="$2a$10$YOUR_BCRYPT_HASH_FOR_PASSWORD_HERE"/> <!-- REPLACE THIS HASH -->
+            <column name="email" value="testuser@jaiswarsecurities.com"/>
+            <column name="employee_id" value="EMP00001"/>
+            <column name="first_name" value="Test"/>
+            <column name="last_name" value="User"/>
+            <column name="department" value="Technology"/>
+            <column name="job_title" value="System User"/>
+            <column name="account_status" value="ACTIVE"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="password_last_changed" type="TIMESTAMP WITHOUT TIME ZONE" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <!-- Assign roles to the test user -->
+        <!-- Assuming role 'ROLE_USER' has id=1 and 'ROLE_ADMIN' has id=2 after the first changeset. -->
+        <!-- This is fragile if IDs change. Better to look up IDs if Liquibase supported it directly in insert. -->
+        <!-- For simplicity, we assume IDs. A more robust way in code would be to fetch roles by name. -->
+        <sql>
+            INSERT INTO user_roles (user_id, role_id) VALUES
+            ((SELECT id from users where username = 'testuser'), (SELECT id from roles where name = 'ROLE_USER')),
+            ((SELECT id from users where username = 'testuser'), (SELECT id from roles where name = 'ROLE_ADMIN'));
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

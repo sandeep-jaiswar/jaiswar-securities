@@ -1,5 +1,7 @@
 package com.jaiswarsecurities.cerberusauth.controller;
 
+import com.jaiswarsecurities.cerberusauth.payload.JwtAuthenticationResponse;
+import com.jaiswarsecurities.cerberusauth.payload.LoginRequest;
 import com.jaiswarsecurities.cerberusauth.security.JwtTokenProvider;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider tokenProvider;
 
     @Autowired
-    private JwtTokenProvider tokenProvider;
+    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider) {
+        this.authenticationManager = authenticationManager;
+        this.tokenProvider = tokenProvider;
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<JwtAuthenticationResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -36,55 +41,5 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
-    }
-
-    // Inner class for Login Request DTO
-    static class LoginRequest {
-        private String username;
-        private String password;
-
-        // Getters and Setters
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-    }
-
-    // Inner class for JWT Authentication Response DTO
-    static class JwtAuthenticationResponse {
-        private String accessToken;
-        private String tokenType = "Bearer";
-
-        public JwtAuthenticationResponse(String accessToken) {
-            this.accessToken = accessToken;
-        }
-
-        // Getters and Setters
-        public String getAccessToken() {
-            return accessToken;
-        }
-
-        public void setAccessToken(String accessToken) {
-            this.accessToken = accessToken;
-        }
-
-        public String getTokenType() {
-            return tokenType;
-        }
-
-        public void setTokenType(String tokenType) {
-            this.tokenType = tokenType;
-        }
     }
 }
