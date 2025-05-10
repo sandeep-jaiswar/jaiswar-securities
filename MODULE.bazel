@@ -31,7 +31,6 @@ bazel_dep(name = "platforms", version = "0.0.11")
 bazel_dep(name = "rules_testing", version = "0.8.0")
 bazel_dep(name = "rules_license", version = "1.0.0")
 
-
 # Rust support
 bazel_dep(name = "rules_rust", version = "0.61.0")
 
@@ -41,7 +40,9 @@ bazel_dep(name = "rules_cc", version = "0.1.1")
 # Go support
 bazel_dep(name = "rules_go", version = "0.54.0")
 
-# Maven dependencies for cerberus-auth and potentially other Java projects
+# --- Extensions (must be declared separately) ---
+
+# JVM/Maven dependencies
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
     artifacts = [
@@ -51,8 +52,11 @@ maven.install(
         "io.jsonwebtoken:jjwt-impl:0.11.5",
         "io.jsonwebtoken:jjwt-jackson:0.11.5",
     ],
-    repositories = [
-        "https://repo1.maven.org/maven2",
-    ],
+    repositories = ["https://repo1.maven.org/maven2"],
 )
-use_repo(maven, "@maven") # Renamed to avoid conflict if you have another repo named 'maven'
+use_repo(maven, "maven")
+
+# Java toolchain setup (remote JDK)
+java = use_extension("@rules_java//java:extensions.bzl", "java")
+java.toolchain(version = "17")
+use_repo(java, "remote_java_tools", "remotejdk_17")
