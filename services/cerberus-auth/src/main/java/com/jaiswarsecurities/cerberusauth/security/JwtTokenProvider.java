@@ -26,8 +26,8 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    // @Value("${app.jwt.secret}") // Temporarily commented out for debugging
-    private String jwtSecretString = "TestSecretKeyShouldBeLongEnoughForHS512AlgorithmByDefault1234"; // 68 chars
+    @Value("${app.jwt.secret}")
+    private String jwtSecretString;
 
     @Value("${app.jwt.expiration-ms}")
     private long jwtExpirationInMs;
@@ -43,10 +43,9 @@ public class JwtTokenProvider {
         // Ensure the secret key is strong enough for HS512. 
         // A common recommendation is at least 64 bytes (512 bits) for HS512.
         // For production, generate this string securely and store it appropriately.
-        // if (jwtSecretString.getBytes().length < 64 && "your-super-secret-and-long-random-string-that-is-at-least-512-bits-long-for-hs512".equals(jwtSecretString)) {
-        //      logger.warn("Using a default weak JWT secret. THIS IS NOT SECURE FOR PRODUCTION. Please configure a strong app.jwt.secret.");
-        // }
-        logger.info("JWT Secret String being used (length {}): '{}'", jwtSecretString.getBytes().length, jwtSecretString);
+        if (jwtSecretString.getBytes().length < 64 && "your-super-secret-and-long-random-string-that-is-at-least-512-bits-long-for-hs512".equals(jwtSecretString)) {
+             logger.warn("Using a default weak JWT secret. THIS IS NOT SECURE FOR PRODUCTION. Please configure a strong app.jwt.secret.");
+        }
         this.jwtSecret = Keys.hmacShaKeyFor(jwtSecretString.getBytes());
         logger.info("JwtSecretKey successfully initialized.");
     }

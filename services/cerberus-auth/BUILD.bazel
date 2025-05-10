@@ -4,6 +4,7 @@ load("@rules_jvm_external//:defs.bzl", "artifact")
 java_library(
     name = "cerberus_auth_lib",
     srcs = glob(["src/main/java/**/*.java"]),
+    resources = glob(["src/main/resources/**"]),  # Added this line
     deps = [
         artifact("org.springframework.boot:spring-boot-starter-web"),
         artifact("org.springframework.boot:spring-boot-starter-security"),
