@@ -17,30 +17,22 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Ensure Cache Path Exists
+      - name: Install Bazelisk Manually
         run: |
-          mkdir -p ~/.cache/bazel
+          echo "Installing Bazelisk..."
+          curl -sSL https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-amd64 -o /tmp/bazelisk
+          chmod +x /tmp/bazelisk
+          mv /tmp/bazelisk /usr/local/bin/bazelisk
+          bazelisk version
 
-      - name: Setup Bazelisk (Bazel version manager)
-        uses: bazelbuild/setup-bazelisk@v1
-
-      - name: Get Bazel Output Base Path
-        id: bazel-path
+      - name: Get Bazel output paths
+        id: bazel-paths
         run: |
-          echo "path=$(bazel info output_base)" >> "$GITHUB_OUTPUT"
+          echo "bin=$(bazel info bazel-bin)" >> "$GITHUB_OUTPUT"
+          echo "out=$(bazel info output_path)" >> "$GITHUB_OUTPUT"
+          echo "testlogs=$(bazel info bazel-testlogs)" >> "$GITHUB_OUTPUT"
 
-      - name: Restore Bazel Cache
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: ${{ steps.bazel-path.outputs.path }}
-          key: bazel-${{ runner.os }}-${{ hashFiles('WORKSPACE', '**/BUILD', '**/*.bzl') }}
-          restore-keys: |
-            bazel-${{ runner.os }}-
-      - name: Debug Cache Key and Path
-        run: |
-          echo "Cache path: ${{ steps.bazel-path.outputs.path }}"
-          echo "Cache key: bazel-${{ runner.os }}-${{ hashFiles('WORKSPACE', '**/BUILD', '**/*.bzl') }}"
+      # Removed Cache Step
 
       - name: Inject BuildBuddy Remote Cache Key (if set)
         if: env.BUILDBUDDY_API_KEY != ''
