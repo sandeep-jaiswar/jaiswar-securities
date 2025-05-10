@@ -15,7 +15,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: client_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: kyc_status_enum
             values:
@@ -30,7 +30,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: kyc_status_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: aml_risk_rating_enum
             values:
@@ -44,7 +44,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: aml_risk_rating_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: record_status_enum
             values:
@@ -60,7 +60,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: record_status_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: account_type_enum
             values:
@@ -76,5 +76,5 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: account_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
       # Using Liquibase <createType> with preConditions for robust ENUM creation

@@ -19,7 +19,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: commission_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: transaction_direction_enum
             values:
@@ -31,4 +31,4 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: transaction_direction_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public

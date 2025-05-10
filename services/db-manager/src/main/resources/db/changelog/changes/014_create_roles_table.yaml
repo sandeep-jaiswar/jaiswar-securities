@@ -40,3 +40,7 @@ databaseChangeLog:
               - column:
                   name: role_name
             unique: true
+      rollback:
+        - dropTable:
+            tableName: roles
+            cascadeConstraints: true

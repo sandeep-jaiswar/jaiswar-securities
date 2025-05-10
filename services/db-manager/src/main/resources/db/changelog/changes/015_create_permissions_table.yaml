@@ -46,3 +46,7 @@ databaseChangeLog:
               - column:
                   name: permission_name
             unique: true
+      rollback:
+        - dropTable:
+            tableName: permissions
+            cascadeConstraints: true

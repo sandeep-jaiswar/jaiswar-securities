@@ -18,7 +18,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: allocation_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: allocation_status_enum
             values:
@@ -35,7 +35,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: allocation_status_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: settlement_instruction_type_enum
             values:
@@ -49,7 +49,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: settlement_instruction_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: settlement_status_enum
             values:
@@ -71,7 +71,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: settlement_status_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: settlement_leg_type_enum
             values:
@@ -85,4 +85,4 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: settlement_leg_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
