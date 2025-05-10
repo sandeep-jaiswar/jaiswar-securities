@@ -7,12 +7,13 @@ java_library(
     deps = [
         artifact("org.springframework.boot:spring-boot-starter-web"),
         artifact("org.springframework.boot:spring-boot-starter-security"),
-        artifact("org.springframework.boot:spring-boot-starter-validation"), # For @Valid
+        artifact("org.springframework.boot:spring-boot-starter-validation"),
         artifact("io.jsonwebtoken:jjwt-api"),
         artifact("io.jsonwebtoken:jjwt-impl"),
         artifact("io.jsonwebtoken:jjwt-jackson"),
 
         # Direct dependencies to satisfy strict deps
+        artifact("jakarta.validation:jakarta.validation-api"), # For @Valid annotation direct use
         artifact("org.springframework.boot:spring-boot-autoconfigure"),
         artifact("org.springframework.boot:spring-boot"),
         artifact("org.springframework:spring-context"),
