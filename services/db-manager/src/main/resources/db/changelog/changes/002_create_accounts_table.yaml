@@ -1,0 +1,108 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_accounts_table_002
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: accounts
+            columns:
+              - column:
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_accounts_client_id
+                    references: clients(client_id)
+              - column:
+                  name: account_number
+                  type: VARCHAR(100)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: account_type
+                  type: account_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency_code # ISO 4217 currency code (e.g., USD, EUR, GBP)
+                  type: VARCHAR(3) # Sticking with VARCHAR(3) for broad currency support
+                  constraints:
+                    nullable: false
+                    # Consider a CHECK constraint or foreign key to a currencies table
+              - column:
+                  name: balance
+                  type: NUMERIC(19, 4) # Precision for financial amounts
+                  defaultValueNumeric: 0.00
+                  constraints:
+                    nullable: false
+              - column:
+                  name: margin_limit
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: status
+                  type: record_status_enum
+                  defaultValue: "PENDING_ACTIVATION"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: opened_date
+                  type: DATE
+              - column:
+                  name: closed_date
+                  type: DATE
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: VARCHAR(255)
+              - column:
+                  name: updated_by
+                  type: VARCHAR(255)
+        - createIndex:
+            indexName: idx_accounts_client_id
+            tableName: accounts
+            columns:
+              - column:
+                  name: client_id
+        - createIndex:
+            indexName: idx_accounts_account_number
+            tableName: accounts
+            columns:
+              - column:
+                  name: account_number
+            unique: true
+        - createIndex:
+            indexName: idx_accounts_account_type
+            tableName: accounts
+            columns:
+              - column:
+                  name: account_type
+        - createIndex:
+            indexName: idx_accounts_status
+            tableName: accounts
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            indexName: idx_accounts_currency_code
+            tableName: accounts
+            columns:
+              - column:
+                  name: currency_code

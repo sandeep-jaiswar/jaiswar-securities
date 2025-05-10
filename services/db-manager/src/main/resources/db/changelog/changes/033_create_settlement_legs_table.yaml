@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_settlement_legs_table_032
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: settlement_legs
+            columns:
+              - column:
+                  name: settlement_leg_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: settlement_instruction_id # FK to the parent settlement instruction
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_settlement_legs_instruction_id
+                    references: settlement_instructions(settlement_instruction_id)
+              - column:
+                  name: leg_type 
+                  type: settlement_leg_type_enum # CASH_PAYMENT, SECURITY_DELIVERY etc.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: instrument_id # Nullable if it's a pure cash leg
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_settlement_legs_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: quantity # For security legs
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: amount # For cash legs
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: currency_code # For cash legs
+                  type: CHAR(3)
+                  constraints:
+                    foreignKeyName: fk_settlement_legs_currency
+                    references: currencies(currency_code_iso_alpha)
+              - column:
+                  name: direction # DEBIT or CREDIT from perspective of our books for this leg
+                  type: VARCHAR(10) # Could be an ENUM ('DEBIT', 'CREDIT')
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: leg_status # Can have its own status if legs settle independently or have issues
+                  type: settlement_status_enum 
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_settlement_legs_instruction_id
+            tableName: settlement_legs
+            columns:
+              - column:
+                  name: settlement_instruction_id

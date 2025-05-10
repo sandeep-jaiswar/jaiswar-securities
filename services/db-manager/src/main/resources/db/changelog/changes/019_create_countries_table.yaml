@@ -1,0 +1,59 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_countries_table_019
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: countries
+            columns:
+              - column:
+                  name: country_code_iso_alpha2 # ISO 3166-1 alpha-2 (e.g., US, GB)
+                  type: CHAR(2)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: country_code_iso_alpha3 # ISO 3166-1 alpha-3 (e.g., USA, GBR)
+                  type: CHAR(3)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: country_code_iso_numeric # ISO 3166-1 numeric (e.g., 840, 826)
+                  type: INTEGER
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: country_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: default_currency_code # Optional: Default currency for the country
+                  type: CHAR(3)
+                  # FK to currencies will be added in 020_create_currencies_table.yaml
+              - column:
+                  name: region_name # e.g., Americas, Europe, Asia
+                  type: VARCHAR(100)
+              - column:
+                  name: sub_region_name # e.g., Northern America, Western Europe
+                  type: VARCHAR(100)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_countries_country_name
+            tableName: countries
+            columns:
+              - column:
+                  name: country_name

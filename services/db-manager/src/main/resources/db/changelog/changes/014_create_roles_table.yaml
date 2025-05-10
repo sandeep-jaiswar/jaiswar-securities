@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_roles_table_014
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: role_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role_name # e.g., ADMIN, TRADER, RISK_ANALYST, OPERATIONS, CLIENT_SUPPORT
+                  type: VARCHAR(100)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_roles_role_name
+            tableName: roles
+            columns:
+              - column:
+                  name: role_name
+            unique: true
+      rollback:
+        - dropTable:
+            tableName: roles
+            cascadeConstraints: true

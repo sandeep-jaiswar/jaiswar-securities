@@ -1,0 +1,77 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_instrument_identifiers_table_006
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: instrument_identifiers
+            columns:
+              - column:
+                  name: identifier_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: instrument_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_instrument_identifiers_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: identifier_type
+                  type: identifier_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: identifier_value
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_primary # Indicates if this is the primary identifier for a given type (e.g. primary ticker)
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: source # Where this identifier comes from (e.g., exchange, data vendor)
+                  type: VARCHAR(100)
+              - column:
+                  name: valid_from
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+              - column:
+                  name: valid_to
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+        # Unique constraint on instrument_id, identifier_type, and identifier_value to avoid duplicates
+        - addUniqueConstraint:
+            constraintName: uq_instrument_id_type_value
+            tableName: instrument_identifiers
+            columnNames: instrument_id, identifier_type, identifier_value
+        - createIndex:
+            indexName: idx_instrument_identifiers_instrument_id
+            tableName: instrument_identifiers
+            columns:
+              - column:
+                  name: instrument_id
+        - createIndex:
+            indexName: idx_instrument_identifiers_type_value
+            tableName: instrument_identifiers
+            columns:
+              - column:
+                  name: identifier_type
+              - column:
+                  name: identifier_value
+            # This index helps find instruments by a specific identifier value and type

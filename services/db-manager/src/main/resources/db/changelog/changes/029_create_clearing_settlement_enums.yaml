@@ -1,0 +1,88 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_clearing_settlement_enums_029
+      author: sandeep-jaiswar
+      changes:
+        - createType:
+            typeName: allocation_type_enum
+            values:
+              - value: PRE_TRADE_ALLOCATION
+              - value: POST_TRADE_ALLOCATION
+              - value: STEP_OUT
+              - value: STEP_IN
+              - value: TRADE_AGGREGATION
+              - value: MANUAL_ALLOCATION
+            remarks: "Type for allocation methods"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: allocation_type_enum
+                      schemaName: public
+        - createType:
+            typeName: allocation_status_enum
+            values:
+              - value: PENDING_APPROVAL
+              - value: PENDING_EXECUTION
+              - value: ALLOCATED
+              - value: PARTIALLY_ALLOCATED
+              - value: REJECTED
+              - value: CANCELED
+              - value: SUBMITTED_TO_CLEARING
+            remarks: "Type for allocation statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: allocation_status_enum
+                      schemaName: public
+        - createType:
+            typeName: settlement_instruction_type_enum
+            values:
+              - value: DELIVER_VS_PAYMENT
+              - value: RECEIVE_VS_PAYMENT
+              - value: DELIVER_FREE_OF_PAYMENT
+              - value: RECEIVE_FREE_OF_PAYMENT
+            remarks: "Type for settlement instruction categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: settlement_instruction_type_enum
+                      schemaName: public
+        - createType:
+            typeName: settlement_status_enum
+            values:
+              - value: PENDING_GENERATION
+              - value: PENDING_SUBMISSION
+              - value: SUBMITTED_TO_AGENT
+              - value: PENDING_MATCHING
+              - value: MATCHED
+              - value: UNMATCHED
+              - value: PENDING_SETTLEMENT
+              - value: SETTLED
+              - value: PARTIALLY_SETTLED
+              - value: FAILED_SETTLEMENT
+              - value: CANCELED
+              - value: REJECTED_BY_AGENT
+            remarks: "Type for settlement statuses"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: settlement_status_enum
+                      schemaName: public
+        - createType:
+            typeName: settlement_leg_type_enum
+            values:
+              - value: CASH_PAYMENT
+              - value: CASH_RECEIPT
+              - value: SECURITY_DELIVERY
+              - value: SECURITY_RECEIPT
+            remarks: "Type for settlement leg categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: settlement_leg_type_enum
+                      schemaName: public

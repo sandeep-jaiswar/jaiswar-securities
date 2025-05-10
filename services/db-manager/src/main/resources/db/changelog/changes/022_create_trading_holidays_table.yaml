@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_trading_holidays_table_022
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: trading_holidays
+            columns:
+              - column:
+                  name: holiday_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: calendar_id # FK to market_calendars
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trading_holidays_calendar_id
+                    references: market_calendars(calendar_id)
+              - column:
+                  name: holiday_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description # e.g., New Year's Day, Christmas Day
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: open_time # Optional: Special open time on this holiday (e.g., half-day)
+                  type: TIME
+              - column:
+                  name: close_time # Optional: Special close time on this holiday
+                  type: TIME
+              - column:
+                  name: is_full_day_closure
+                  type: BOOLEAN
+                  defaultValueBoolean: true # Assume most holidays are full day closures
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+        # Unique constraint for a calendar and a holiday date
+        - addUniqueConstraint:
+            constraintName: uq_calendar_holiday_date
+            tableName: trading_holidays
+            columnNames: calendar_id, holiday_date
+        - createIndex:
+            indexName: idx_trading_holidays_calendar_date
+            tableName: trading_holidays
+            columns:
+              - column:
+                  name: calendar_id
+              - column:
+                  name: holiday_date

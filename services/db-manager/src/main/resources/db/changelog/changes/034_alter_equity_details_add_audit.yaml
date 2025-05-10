@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter_equity_details_add_audit_034
+      author: sandeep-jaiswar
+      changes:
+        - addColumn:
+            tableName: equity_details
+            columns:
+              - column:
+                  name: created_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_equity_details_created_by
+                    references: users(user_id)
+              - column:
+                  name: updated_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_equity_details_updated_by
+                    references: users(user_id)

@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter_orders_trades_exchange_fks_038
+      author: sandeep-jaiswar
+      changes:
+        # Orders table
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: execution_destination_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_orders_exec_dest_id
+                    references: exchanges(exchange_id)
+                    nullable: true
+        # (Manual/Scripted step if data exists to populate execution_destination_id from old execution_destination)
+        - dropColumn:
+            tableName: orders
+            columnName: execution_destination
+
+        # Trades table
+        - addColumn:
+            tableName: trades
+            columns:
+              - column:
+                  name: last_market_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_trades_last_market_id
+                    references: exchanges(exchange_id)
+                    nullable: true
+        # (Manual/Scripted step if data exists to populate last_market_id from old last_market)
+        - dropColumn:
+            tableName: trades
+            columnName: last_market

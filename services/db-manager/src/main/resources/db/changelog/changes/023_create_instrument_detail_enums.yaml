@@ -1,0 +1,131 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_instrument_detail_enums_023
+      author: sandeep-jaiswar
+      changes:
+        - createType:
+            typeName: issuer_type_enum
+            values:
+              - value: SOVEREIGN
+              - value: CORPORATE
+              - value: MUNICIPAL
+              - value: SUPRANATIONAL
+              - value: AGENCY
+            remarks: "Type for issuer categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: issuer_type_enum
+                      schemaName: public
+        - createType:
+            typeName: bond_type_enum
+            values:
+              - value: GOVERNMENT
+              - value: CORPORATE_FIXED
+              - value: CORPORATE_FLOATING
+              - value: MUNICIPAL
+              - value: CONVERTIBLE
+              - value: ZERO_COUPON
+              - value: INFLATION_LINKED
+              - value: ASSET_BACKED
+              - value: MORTGAGE_BACKED
+              - value: COVERED_BOND
+            remarks: "Type for bond categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: bond_type_enum
+                      schemaName: public
+        - createType:
+            typeName: coupon_frequency_enum
+            values:
+              - value: ANNUAL
+              - value: SEMI_ANNUAL
+              - value: QUARTERLY
+              - value: MONTHLY
+              - value: AT_MATURITY
+              - value: NONE
+              - value: OTHER
+            remarks: "Type for coupon payment frequencies"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: coupon_frequency_enum
+                      schemaName: public
+        - createType:
+            typeName: day_count_convention_enum
+            values:
+              - value: ACT_360
+              - value: ACT_365
+              - value: ACT_365F
+              - value: THIRTY_360
+              - value: ACT_ACT_ISDA
+              - value: ACT_ACT_ICMA
+              - value: EUROBOND_BASIS
+              - value: ONE_ONE
+            remarks: "Type for day count conventions in financial calculations"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: day_count_convention_enum
+                      schemaName: public
+        - createType:
+            typeName: derivative_type_enum
+            values:
+              - value: OPTION
+              - value: FUTURE
+              - value: SWAP
+              - value: FORWARD
+              - value: CFD
+              - value: WARRANT
+              - value: RIGHT
+            remarks: "Type for derivative instrument categories"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: derivative_type_enum
+                      schemaName: public
+        - createType:
+            typeName: option_type_enum
+            values:
+              - value: CALL
+              - value: PUT
+            remarks: "Type for option categories (Call/Put)"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: option_type_enum
+                      schemaName: public
+        - createType:
+            typeName: exercise_style_enum
+            values:
+              - value: AMERICAN
+              - value: EUROPEAN
+              - value: BERMUDAN
+              - value: CANARY
+              - value: ASIAN
+            remarks: "Type for option exercise styles"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: exercise_style_enum
+                      schemaName: public
+        - createType:
+            typeName: settlement_type_enum
+            values:
+              - value: CASH
+              - value: PHYSICAL
+            remarks: "Type for settlement methods (Cash/Physical)"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: settlement_type_enum
+                      schemaName: public

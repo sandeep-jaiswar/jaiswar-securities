@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter_instruments_add_issuer_fk_028
+      author: sandeep-jaiswar
+      changes:
+        - addColumn:
+            tableName: instruments
+            columns:
+              - column:
+                  name: issuer_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_instruments_issuer_id
+                    references: issuers(issuer_id)
+                    # Making it nullable, as not all instruments might have an issuer initially,
+                    # or some instrument types might not have a traditional issuer (e.g., FX, some commodities if modeled as instruments)
+                    nullable: true
+        - createIndex:
+            indexName: idx_instruments_issuer_id
+            tableName: instruments
+            columns:
+              - column:
+                  name: issuer_id
+      rollback:
+        - dropIndex:
+            tableName: instruments
+            indexName: idx_instruments_issuer_id
+        - dropForeignKeyConstraint:
+            baseTableName: instruments
+            constraintName: fk_instruments_issuer_id
+        - dropColumn:
+            tableName: instruments
+            columnName: issuer_id

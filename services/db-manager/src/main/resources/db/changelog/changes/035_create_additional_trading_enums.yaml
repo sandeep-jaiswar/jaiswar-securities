@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_additional_trading_enums_035
+      author: sandeep-jaiswar
+      changes:
+        - createType:
+            typeName: commission_type_enum
+            values:
+              - value: PER_UNIT
+              - value: PERCENTAGE
+              - value: ABSOLUTE
+              - value: PERCENTAGE_WAIVED_CASH_DISCOUNT
+              - value: PERCENTAGE_WAIVED_ENHANCED_UNITS
+              - value: POINTS_PER_BOND_OR_CONTRACT
+              - value: OTHER
+            remarks: "Type for commission calculation methods"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: commission_type_enum
+                      schemaName: public
+        - createType:
+            typeName: transaction_direction_enum
+            values:
+              - value: DEBIT
+              - value: CREDIT
+            remarks: "Type for transaction direction (Debit/Credit)"
+            preConditions:
+              - onFail: MARK_RAN
+              - not:
+                  - typeExists:
+                      typeName: transaction_direction_enum
+                      schemaName: public

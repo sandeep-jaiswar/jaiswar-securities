@@ -1,0 +1,99 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_positions_table_011
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: positions
+            columns:
+              - column:
+                  name: position_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_positions_account_id
+                    references: accounts(account_id)
+              - column:
+                  name: instrument_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_positions_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: position_date # Date for which this position snapshot is valid (typically EOD)
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: position_type # e.g., START_OF_DAY, END_OF_DAY, INTRADAY_SNAPSHOT
+                  type: position_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity # Positive for long, negative for short
+                  type: NUMERIC(19, 4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: average_cost_price # Weighted average cost of acquiring the position
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: last_traded_price # Last traded price for the instrument on position_date (valuation price)
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: market_value # quantity * last_traded_price (or a specific valuation price)
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: unrealized_pnl # Profit or loss if the position were closed at market_value
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: realized_pnl_today # Profit or loss realized on this position_date from closing trades
+                  type: NUMERIC(19, 4)
+                  defaultValueNumeric: 0.00
+              - column:
+                  name: currency_code # Currency of the position values
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+        # Unique constraint for a given account, instrument, date, and position type
+        - addUniqueConstraint:
+            constraintName: uq_account_instrument_date_type
+            tableName: positions
+            columnNames: account_id, instrument_id, position_date, position_type
+        - createIndex:
+            indexName: idx_positions_account_date_type
+            tableName: positions
+            columns:
+              - column:
+                  name: account_id
+              - column:
+                  name: position_date
+              - column:
+                  name: position_type # Often query for EOD positions on a specific date
+        - createIndex:
+            indexName: idx_positions_instrument_date
+            tableName: positions
+            columns:
+              - column:
+                  name: instrument_id
+              - column:
+                  name: position_date

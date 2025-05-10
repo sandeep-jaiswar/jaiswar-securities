@@ -1,0 +1,175 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_marketdata_orders_trades_enums_007
+      author: sandeep-jaiswar
+      changes:
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_type_enum') THEN
+                  CREATE TYPE order_type_enum AS ENUM (
+                    'MARKET',             -- FIX Tag 40: 1
+                    'LIMIT',              -- FIX Tag 40: 2
+                    'STOP',               -- FIX Tag 40: 3 (Stop Loss)
+                    'STOP_LIMIT',         -- FIX Tag 40: 4
+                    'MARKET_ON_CLOSE',    -- FIX Tag 40: 5
+                    'LIMIT_ON_CLOSE',     -- FIX Tag 40: B
+                    'PEGGED',             -- FIX Tag 40: P
+                    'ICEBERG',
+                    'TWAP',               # Time-Weighted Average Price
+                    'VWAP',               # Volume-Weighted Average Price
+                    'OTHER'
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_side_enum') THEN
+                  CREATE TYPE order_side_enum AS ENUM (
+                    'BUY',                -- FIX Tag 54: 1
+                    'SELL',               -- FIX Tag 54: 2
+                    'SELL_SHORT',         -- FIX Tag 54: 5
+                    'SELL_SHORT_EXEMPT',  -- FIX Tag 54: 6
+                    'BUY_TO_COVER',       # Not a direct FIX value for Side, but common representation
+                    'CROSS',              # FIX Tag 54: 8 (Cross) / 9 (Cross Short)
+                    'REDEMPTION'          # For funds
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status_enum') THEN
+                  CREATE TYPE order_status_enum AS ENUM (
+                    'NEW',                        -- FIX Tag 39: 0
+                    'PARTIALLY_FILLED',           -- FIX Tag 39: 1
+                    'FILLED',                     -- FIX Tag 39: 2
+                    'DONE_FOR_DAY',               -- FIX Tag 39: 3
+                    'CANCELED',                   -- FIX Tag 39: 4
+                    'REPLACED',                   -- FIX Tag 39: 5 (Replaced order, new ClOrdID)
+                    'PENDING_CANCEL',             -- FIX Tag 39: 6
+                    'STOPPED',                    -- FIX Tag 39: 7
+                    'REJECTED',                   -- FIX Tag 39: 8
+                    'SUSPENDED',                  -- FIX Tag 39: 9
+                    'PENDING_NEW',                -- FIX Tag 39: A
+                    'CALCULATED',                 -- FIX Tag 39: B
+                    'EXPIRED',                    -- FIX Tag 39: C
+                    'ACCEPTED_FOR_BIDDING',       -- FIX Tag 39: D
+                    'PENDING_REPLACE',            -- FIX Tag 39: E
+                    'ACCEPTED_BY_EXCHANGE',       # Custom status, pre-NEW if needed
+                    'ROUTED_TO_EXCHANGE'        # Custom status
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'time_in_force_enum') THEN
+                  CREATE TYPE time_in_force_enum AS ENUM (
+                    'DAY',                -- FIX Tag 59: 0
+                    'GTC',                -- FIX Tag 59: 1 (Good Till Cancel)
+                    'OPG',                -- FIX Tag 59: 2 (At the Opening)
+                    'IOC',                -- FIX Tag 59: 3 (Immediate or Cancel)
+                    'FOK',                -- FIX Tag 59: 4 (Fill or Kill)
+                    'GTX',                -- FIX Tag 59: 5 (Good Till Crossing)
+                    'GTD',                -- FIX Tag 59: 6 (Good Till Date)
+                    'ATC'                 -- FIX Tag 59: 7 (At the Close)
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'execution_type_enum') THEN
+                  CREATE TYPE execution_type_enum AS ENUM (
+                    -- FIX Tag 150: ExecType
+                    'NEW',                        -- 0 = New
+                    'PARTIAL_FILL',               -- 1 = Partial fill
+                    'FILL',                       -- 2 = Fill
+                    'DONE_FOR_DAY',               -- 3 = Done for day
+                    'CANCELED',                   -- 4 = Canceled
+                    'REPLACED',                   -- 5 = Replaced
+                    'PENDING_CANCEL',             -- 6 = Pending Cancel
+                    'STOPPED',                    -- 7 = Stopped
+                    'REJECTED',                   -- 8 = Rejected
+                    'SUSPENDED',                  -- 9 = Suspended
+                    'PENDING_NEW',                -- A = Pending New
+                    'CALCULATED',                 -- B = Calculated
+                    'EXPIRED',                    -- C = Expired
+                    'RESTATED',                   -- D = Restated
+                    'PENDING_REPLACE',            -- E = Pending Replace
+                    'TRADE',                      -- F = Trade (Execution Report)
+                    'TRADE_CORRECT',              -- G = Trade Correct
+                    'TRADE_CANCEL',               -- H = Trade Cancel
+                    'ORDER_STATUS',               -- I = Order Status
+                    'TRADE_IN_A_CLEARING_HOLD',   -- J
+                    'TRADE_HAS_BEEN_RELEASED_TO_CLEARING', -- K
+                    'TRIGGERED_OR_ACTIVATED_BY_SYSTEM' -- L
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'trade_status_enum') THEN
+                  CREATE TYPE trade_status_enum AS ENUM (
+                    'PENDING_SETTLEMENT',
+                    'SETTLED',
+                    'CANCELED',                   # If a trade is voided post-execution
+                    'FAILED_SETTLEMENT',
+                    'ALLOCATED',                  # If trade is allocated to sub-accounts
+                    'PENDING_CLEARING'
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'position_effect_enum') THEN
+                  CREATE TYPE position_effect_enum AS ENUM (
+                    'OPEN',               -- FIX Tag 77: O
+                    'CLOSE',              -- FIX Tag 77: C
+                    'ROLLED',             -- FIX Tag 77: R
+                    'FIFO'                -- FIX Tag 77: F
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'market_data_entry_type_enum') THEN
+                  CREATE TYPE market_data_entry_type_enum AS ENUM (
+                    -- Subset of FIX Tag 269: MDEntryType
+                    'BID',                      -- 0
+                    'OFFER',                    -- 1
+                    'TRADE',                    -- 2
+                    'INDEX_VALUE',              -- 3
+                    'OPENING_PRICE',            -- 4
+                    'CLOSING_PRICE',            -- 5
+                    'SETTLEMENT_PRICE',         -- 6
+                    'TRADING_SESSION_HIGH_PRICE', -- 7
+                    'TRADING_SESSION_LOW_PRICE',  -- 8
+                    'TRADING_SESSION_VWAP_PRICE', -- 9
+                    'TRADE_VOLUME',             -- B
+                    'OPEN_INTEREST',            -- C
+                    'EMPTY_BOOK'                -- J (Empty Book)
+                  );
+                END IF;
+              END $$;
+            dbms: postgresql
+            splitStatements: false

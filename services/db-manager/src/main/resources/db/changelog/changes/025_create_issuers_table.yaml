@@ -1,0 +1,96 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_issuers_table_023
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: issuers
+            columns:
+              - column:
+                  name: issuer_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: issuer_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: issuer_type # e.g., SOVEREIGN, CORPORATE, MUNICIPAL, SUPRANATIONAL
+                  type: VARCHAR(100)
+              - column:
+                  name: country_code_of_domicile # FK to countries table
+                  type: CHAR(2)
+                  constraints:
+                    foreignKeyName: fk_issuers_country_code
+                    references: countries(country_code_iso_alpha2)
+              - column:
+                  name: industry_sector # For corporate issuers
+                  type: VARCHAR(100)
+              - column:
+                  name: industry_group # For corporate issuers
+                  type: VARCHAR(100)
+              - column:
+                  name: credit_rating_moodys # Example credit rating
+                  type: VARCHAR(20)
+              - column:
+                  name: credit_rating_sp # Example credit rating
+                  type: VARCHAR(20)
+              - column:
+                  name: credit_rating_fitch # Example credit rating
+                  type: VARCHAR(20)
+              - column:
+                  name: website
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: record_status_enum # Re-using existing ENUM for Active/Inactive etc.
+                  defaultValue: "ACTIVE"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_issuers_created_by
+                    references: users(user_id)
+              - column:
+                  name: updated_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_issuers_updated_by
+                    references: users(user_id)
+        - createIndex:
+            indexName: idx_issuers_issuer_name
+            tableName: issuers
+            columns:
+              - column:
+                  name: issuer_name
+            unique: true
+        - createIndex:
+            indexName: idx_issuers_issuer_type
+            tableName: issuers
+            columns:
+              - column:
+                  name: issuer_type
+        - createIndex:
+            indexName: idx_issuers_country_code
+            tableName: issuers
+            columns:
+              - column:
+                  name: country_code_of_domicile

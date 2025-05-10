@@ -1,0 +1,160 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_orders_table_009
+      author: sandeep-jaiswar
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: order_id # Internal unique order ID
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client_order_id # FIX Tag 11: ClOrdID
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: original_client_order_id # FIX Tag 41: OrigClOrdID (for cancels/replaces)
+                  type: VARCHAR(255)
+              - column:
+                  name: exchange_order_id # FIX Tag 37: OrderID (assigned by exchange)
+                  type: VARCHAR(255)
+              - column:
+                  name: account_id # Internal account ID
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_orders_account_id
+                    references: accounts(account_id)
+              - column:
+                  name: instrument_id # Internal instrument ID
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_orders_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: side # FIX Tag 54: Side
+                  type: order_side_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_type # FIX Tag 40: OrdType
+                  type: order_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_quantity # FIX Tag 38: OrderQty
+                  type: NUMERIC(19, 4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: leaves_quantity # FIX Tag 151: LeavesQty
+                  type: NUMERIC(19, 4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cum_quantity # FIX Tag 14: CumQty (total filled quantity)
+                  type: NUMERIC(19, 4)
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price # FIX Tag 44: Price (for limit orders)
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: stop_price # FIX Tag 99: StopPx (for stop/stop-limit orders)
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: currency_code # FIX Tag 15: Currency
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: time_in_force # FIX Tag 59: TimeInForce
+                  type: time_in_force_enum
+                  defaultValue: "DAY"
+              - column:
+                  name: transact_time # FIX Tag 60: TransactTime (time of order creation/modification)
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: effective_time # FIX Tag 168: EffectiveTime (for GTD orders)
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: expire_time # FIX Tag 126: ExpireTime / Tag 432 ExpireDate (for GTD orders)
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: order_status # FIX Tag 39: OrdStatus
+                  type: order_status_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: execution_destination # FIX Tag 100: ExDestination (intended exchange)
+                  type: VARCHAR(50) # Could FK to exchanges.exchange_code
+              - column:
+                  name: handling_instructions # FIX Tag 21: HandlInst
+                  type: VARCHAR(10)
+              - column:
+                  name: text # FIX Tag 58: Text (free form text associated with order)
+                  type: TEXT
+              - column:
+                  name: fix_message # Store the raw FIX message if needed for audit
+                  type: TEXT
+              - column:
+                  name: last_updated_by # User or system that last updated the order
+                  type: VARCHAR(255)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_orders_client_order_id
+            tableName: orders
+            columns:
+              - column:
+                  name: client_order_id
+            unique: true
+        - createIndex:
+            indexName: idx_orders_exchange_order_id
+            tableName: orders
+            columns:
+              - column:
+                  name: exchange_order_id
+        - createIndex:
+            indexName: idx_orders_account_id
+            tableName: orders
+            columns:
+              - column:
+                  name: account_id
+        - createIndex:
+            indexName: idx_orders_instrument_id
+            tableName: orders
+            columns:
+              - column:
+                  name: instrument_id
+        - createIndex:
+            indexName: idx_orders_order_status
+            tableName: orders
+            columns:
+              - column:
+                  name: order_status
+        - createIndex:
+            indexName: idx_orders_transact_time
+            tableName: orders
+            columns:
+              - column:
+                  name: transact_time
