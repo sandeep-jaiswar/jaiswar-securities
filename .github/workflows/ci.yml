@@ -1,0 +1,75 @@
+name: Bazel CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  bazel:
+    name: Bazel Build & Test
+    runs-on: ubuntu-latest
+    env:
+      BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Bazelisk Manually
+        run: |
+          echo "Installing Bazelisk..."
+          curl -sSL https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-amd64 -o /tmp/bazelisk
+          chmod +x /tmp/bazelisk
+          mv /tmp/bazelisk /usr/local/bin/bazelisk
+          bazelisk version
+
+      - name: Get Bazel output paths
+        id: bazel-paths
+        run: |
+          echo "bin=$(bazel info bazel-bin)" >> "$GITHUB_OUTPUT"
+          echo "out=$(bazel info output_path)" >> "$GITHUB_OUTPUT"
+          echo "testlogs=$(bazel info bazel-testlogs)" >> "$GITHUB_OUTPUT"
+
+      # Removed Cache Step
+
+      - name: Inject BuildBuddy Remote Cache Key (if set)
+        if: env.BUILDBUDDY_API_KEY != ''
+        run: echo "build --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY}" >> .bazelrc
+
+      - name: Determine changed targets
+        id: changes
+        run: |
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | sed 's|^|//|' | paste -sd ' ')
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changed files."
+            echo "CHANGED=" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          echo "Changed files: $CHANGED_FILES"
+          CHANGED_TARGETS=$(bazel query "kind('.*', rdeps(//..., set($CHANGED_FILES)))" || echo "")
+          echo "CHANGED=$CHANGED_TARGETS" >> $GITHUB_ENV
+
+      - name: Build Changed Targets
+        if: env.CHANGED != ''
+        run: |
+          echo "Building changed targets..."
+          bazel build $CHANGED
+
+      - name: Test Changed Targets
+        if: env.CHANGED != ''
+        run: |
+          echo "Testing changed targets..."
+          bazel test $CHANGED --test_output=errors
+
+      - name: Upload Test Logs on Failure
+        if: failure()
+        run: |
+          if [ -d bazel-testlogs ]; then
+            echo "Dumping failed test logs:"
+            find bazel-testlogs -name "test.log" -exec echo "::group::{}" \; -exec cat {} \; -exec echo "::endgroup::" \;
+          else
+            echo "No test logs to upload."
+          fi
