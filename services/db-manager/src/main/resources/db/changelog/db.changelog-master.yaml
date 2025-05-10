@@ -13,4 +13,26 @@ databaseChangeLog:
       file: db/changelog/changes/005_create_instruments_table.yaml
   - include:
       file: db/changelog/changes/006_create_instrument_identifiers_table.yaml
+  - include:
+      file: db/changelog/changes/007_create_trading_related_enums.yaml
+  - include:
+      file: db/changelog/changes/008_create_market_data_table.yaml
+  - include:
+      file: db/changelog/changes/009_create_orders_table.yaml
+  - include:
+      file: db/changelog/changes/010_create_trades_table.yaml
+  - include:
+      file: db/changelog/changes/011_create_positions_table.yaml
+  - include:
+      file: db/changelog/changes/012_create_user_management_enums.yaml
+  - include:
+      file: db/changelog/changes/013_create_users_table.yaml
+  - include:
+      file: db/changelog/changes/014_create_roles_table.yaml
+  - include:
+      file: db/changelog/changes/015_create_permissions_table.yaml
+  - include:
+      file: db/changelog/changes/016_create_role_permissions_table.yaml
+  - include:
+      file: db/changelog/changes/017_create_user_roles_table.yaml
   # Add further table creations or changesets here
