@@ -37,6 +37,10 @@ jobs:
           key: bazel-${{ runner.os }}-${{ hashFiles('WORKSPACE', '**/BUILD', '**/*.bzl') }}
           restore-keys: |
             bazel-${{ runner.os }}-
+      - name: Debug Cache Key and Path
+        run: |
+          echo "Cache path: ${{ steps.bazel-path.outputs.path }}"
+          echo "Cache key: bazel-${{ runner.os }}-${{ hashFiles('WORKSPACE', '**/BUILD', '**/*.bzl') }}"
 
       - name: Inject BuildBuddy Remote Cache Key (if set)
         if: env.BUILDBUDDY_API_KEY != ''
