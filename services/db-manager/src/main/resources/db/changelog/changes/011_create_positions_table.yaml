@@ -27,35 +27,41 @@ databaseChangeLog:
                     foreignKeyName: fk_positions_instrument_id
                     references: instruments(instrument_id)
               - column:
-                  name: position_date # Date for which this position is reported (snapshot date)
+                  name: position_date # Date for which this position snapshot is valid (typically EOD)
                   type: DATE
                   constraints:
                     nullable: false
               - column:
-                  name: quantity # Net quantity of the instrument held
+                  name: position_type # e.g., START_OF_DAY, END_OF_DAY, INTRADAY_SNAPSHOT
+                  type: position_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity # Positive for long, negative for short
                   type: NUMERIC(19, 4)
                   constraints:
                     nullable: false
               - column:
-                  name: average_cost_price # Average price at which the position was acquired
+                  name: average_cost_price # Weighted average cost of acquiring the position
                   type: NUMERIC(19, 9)
               - column:
-                  name: market_value # Current market value of the position (quantity * current_market_price)
+                  name: last_traded_price # Last traded price for the instrument on position_date (valuation price)
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: market_value # quantity * last_traded_price (or a specific valuation price)
                   type: NUMERIC(19, 4)
               - column:
-                  name: unrealized_pnl # Unrealized profit or loss
+                  name: unrealized_pnl # Profit or loss if the position were closed at market_value
                   type: NUMERIC(19, 4)
               - column:
-                  name: currency_code # Currency of the position's value
+                  name: realized_pnl_today # Profit or loss realized on this position_date from closing trades
+                  type: NUMERIC(19, 4)
+                  defaultValueNumeric: 0.00
+              - column:
+                  name: currency_code # Currency of the position values
                   type: VARCHAR(3)
                   constraints:
                     nullable: false
-              - column:
-                  name: last_trade_id_contributing # Optional: ID of the last trade that affected this position
-                  type: UUID
-                  constraints:
-                    foreignKeyName: fk_positions_last_trade_id
-                    references: trades(trade_id) # Can be nullable if position is from other sources
               - column:
                   name: created_at
                   type: TIMESTAMP WITH TIME ZONE
@@ -68,25 +74,26 @@ databaseChangeLog:
                   defaultValueComputed: "CURRENT_TIMESTAMP"
                   constraints:
                     nullable: false
-        # A unique constraint on account, instrument, and date ensures one position entry per instrument per day per account.
-        # For real-time positions, the 'position_date' might be a specific timestamp or handled differently.
-        # This structure is more geared towards end-of-day or intraday snapshot positions.
+        # Unique constraint for a given account, instrument, date, and position type
         - addUniqueConstraint:
-            constraintName: uq_account_instrument_date_position
+            constraintName: uq_account_instrument_date_type
             tableName: positions
-            columnNames: account_id, instrument_id, position_date
-
+            columnNames: account_id, instrument_id, position_date, position_type
         - createIndex:
-            indexName: idx_positions_account_instrument
+            indexName: idx_positions_account_date_type
             tableName: positions
             columns:
               - column:
                   name: account_id
               - column:
-                  name: instrument_id
+                  name: position_date
+              - column:
+                  name: position_type # Often query for EOD positions on a specific date
         - createIndex:
-            indexName: idx_positions_position_date
+            indexName: idx_positions_instrument_date
             tableName: positions
             columns:
+              - column:
+                  name: instrument_id
               - column:
                   name: position_date

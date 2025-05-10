@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_role_permissions_table_016
+      author: gemini-idx-assistant
+      changes:
+        - createTable:
+            tableName: role_permissions
+            columns:
+              - column:
+                  name: role_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_role_permissions_role_id
+                    references: roles(role_id)
+              - column:
+                  name: permission_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_role_permissions_permission_id
+                    references: permissions(permission_id)
+        # Composite primary key
+        - addPrimaryKey:
+            constraintName: pk_role_permissions
+            tableName: role_permissions
+            columnNames: role_id, permission_id
+        - createIndex:
+            indexName: idx_role_permissions_role_id
+            tableName: role_permissions
+            columns:
+              - column:
+                  name: role_id
+        - createIndex:
+            indexName: idx_role_permissions_permission_id
+            tableName: role_permissions
+            columns:
+              - column:
+                  name: permission_id

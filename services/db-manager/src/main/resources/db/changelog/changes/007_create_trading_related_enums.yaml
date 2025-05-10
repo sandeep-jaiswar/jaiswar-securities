@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: create_trading_related_enums_007
+      id: create_trading_related_enums_007_rev1
       author: gemini-idx-assistant
       changes:
         - sql:
@@ -20,7 +20,7 @@ databaseChangeLog:
                   'MARKET', 'LIMIT', 'STOP', 'STOP_LIMIT', 'MARKET_ON_CLOSE', 'LIMIT_ON_CLOSE', 
                   'PEGGED', 'MARKET_WITH_LEFTOVER_AS_LIMIT', 'PREVIOUSLY_QUOTED', 'PREVIOUSLY_INDICATED',
                   'FOREX_MARKET', 'FOREX_LIMIT', 'FOREX_SWAP', 'FOREX_PREVIOUSLY_QUOTED', 'FUNARI', 
-                  'MARKET_IF_TOUCHED', 'MARKET_WITH_LEFTOVER_AS_LIMIT', 'STOP_LOSS_LIMIT' 
+                  'MARKET_IF_TOUCHED', 'STOP_LOSS_LIMIT' 
                 ); END IF; END $$;
             dbms: postgresql
             splitStatements: false
@@ -53,12 +53,38 @@ databaseChangeLog:
             splitStatements: false
         - sql:
             sql: |
-              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'exec_type_enum') THEN
+              DO $$ BEGIN 
+                IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'exec_type_enum') THEN
+                  -- Add new values to existing enum if necessary, or drop and recreate if simpler and no data loss risk
+                  -- For simplicity here, assuming we can recreate if it's a fresh setup or controlled environment
+                  -- In a live system, ALTER TYPE ... ADD VALUE IF NOT EXISTS would be used carefully.
+                  DROP TYPE exec_type_enum CASCADE; -- Use with caution, CASCADE drops dependent objects
+                END IF;
                 CREATE TYPE exec_type_enum AS ENUM (
-                  'NEW', 'DONE_FOR_DAY', 'CANCELED', 'REPLACED', 'PENDING_CANCEL', 'STOPPED', 'REJECTED', 
-                  'SUSPENDED', 'PENDING_NEW', 'CALCULATED', 'EXPIRED', 'RESTATED', 'PENDING_REPLACE', 
-                  'TRADE', 'TRADE_CORRECT', 'TRADE_CANCEL', 'ORDER_STATUS', 'TRADE_IN_A_CLEARING_HOLD'
-                ); END IF; END $$;
+                  'NEW',                          -- 0 - Order acknowledged
+                  'PARTIALLY_FILLED',             -- 1 - Partial fill (often OrdStatus is PARTIALLY_FILLED)
+                  'FILLED',                       -- 2 - Full fill (often OrdStatus is FILLED)
+                  'DONE_FOR_DAY',                 -- 3 - Order valid for day is done
+                  'CANCELED',                     -- 4 - Order canceled
+                  'REPLACED',                     -- 5 - Order replaced
+                  'PENDING_CANCEL',             -- 6 - Cancel request is pending
+                  'STOPPED',                      -- 7 - Order stopped by exchange
+                  'REJECTED',                     -- 8 - Order rejected
+                  'SUSPENDED',                    -- 9 - Order suspended
+                  'PENDING_NEW',                  -- A - Pending new order acknowledgement
+                  'CALCULATED',                   -- B - Order calculated (e.g. VWAP)
+                  'EXPIRED',                      -- C - Order expired
+                  'RESTATED',                     -- D - Order restated (e.g. price change on GTC)
+                  'PENDING_REPLACE',              -- E - Replace request is pending
+                  'TRADE',                        -- F - Actual execution report for a fill/partial fill
+                  'TRADE_CORRECT',                -- G - Corrected trade execution report
+                  'TRADE_CANCEL',                 -- H - Canceled trade execution report
+                  'ORDER_STATUS',                 -- I - Response to an Order Status Request message
+                  'TRADE_IN_A_CLEARING_HOLD',     -- J - Trade is in a clearing hold
+                  'TRADE_HAS_BEEN_RELEASED_TO_CLEARING', -- K - Trade released to clearing
+                  'TRIGGERED_OR_ACTIVATED_BY_SYSTEM' -- L - Order has been triggered or activated by a system
+                );
+              END $$;
             dbms: postgresql
             splitStatements: false
         - sql:

@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_user_roles_table_017
+      author: gemini-idx-assistant
+      changes:
+        - createTable:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_user_roles_user_id
+                    references: users(user_id)
+              - column:
+                  name: role_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_user_roles_role_id
+                    references: roles(role_id)
+        # Composite primary key
+        - addPrimaryKey:
+            constraintName: pk_user_roles
+            tableName: user_roles
+            columnNames: user_id, role_id
+        - createIndex:
+            indexName: idx_user_roles_user_id
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            indexName: idx_user_roles_role_id
+            tableName: user_roles
+            columns:
+              - column:
+                  name: role_id

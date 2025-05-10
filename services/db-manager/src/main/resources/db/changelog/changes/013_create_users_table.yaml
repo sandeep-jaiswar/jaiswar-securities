@@ -1,0 +1,99 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_users_table_013
+      author: gemini-idx-assistant
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username # Unique username for login
+                  type: VARCHAR(100)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: hashed_password # Store hashed passwords only
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email # Unique email for communication and recovery
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(100)
+              - column:
+                  name: last_name
+                  type: VARCHAR(100)
+              - column:
+                  name: status
+                  type: user_status_enum
+                  defaultValue: "PENDING_VERIFICATION"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_login_at
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: failed_login_attempts
+                  type: INTEGER
+                  defaultValueNumeric: 0
+              - column:
+                  name: employee_id # Optional: if users are internal employees
+                  type: VARCHAR(100)
+                  constraints:
+                    unique: true # If present, should be unique
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by # Could be self-referential or system
+                  type: UUID # Or VARCHAR if system/initial admin
+                  constraints:
+                    foreignKeyName: fk_users_created_by
+                    references: users(user_id)
+              - column:
+                  name: updated_by
+                  type: UUID # Or VARCHAR
+                  constraints:
+                    foreignKeyName: fk_users_updated_by
+                    references: users(user_id)
+        - createIndex:
+            indexName: idx_users_username
+            tableName: users
+            columns:
+              - column:
+                  name: username
+            unique: true
+        - createIndex:
+            indexName: idx_users_email
+            tableName: users
+            columns:
+              - column:
+                  name: email
+            unique: true
+        - createIndex:
+            indexName: idx_users_status
+            tableName: users
+            columns:
+              - column:
+                  name: status
