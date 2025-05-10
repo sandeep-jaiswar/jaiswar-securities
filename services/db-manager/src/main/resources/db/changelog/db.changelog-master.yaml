@@ -45,4 +45,26 @@ databaseChangeLog:
       file: db/changelog/changes/021_create_market_calendars_table.yaml
   - include:
       file: db/changelog/changes/022_create_trading_holidays_table.yaml
+  - include:
+      file: db/changelog/changes/023_create_instrument_detail_enums.yaml
+  - include:
+      file: db/changelog/changes/024_create_issuers_table.yaml
+  - include:
+      file: db/changelog/changes/025_create_equity_details_table.yaml
+  - include:
+      file: db/changelog/changes/026_create_bond_details_table.yaml
+  - include:
+      file: db/changelog/changes/027_create_derivative_details_table.yaml
+  - include:
+      file: db/changelog/changes/028_alter_instruments_add_issuer_fk.yaml
+  - include:
+      file: db/changelog/changes/029_create_clearing_settlement_enums.yaml
+  - include:
+      file: db/changelog/changes/030_create_custodians_table.yaml
+  - include:
+      file: db/changelog/changes/031_create_allocations_table.yaml
+  - include:
+      file: db/changelog/changes/032_create_settlement_instructions_table.yaml
+  - include:
+      file: db/changelog/changes/033_create_settlement_legs_table.yaml
   # Add further table creations or changesets here

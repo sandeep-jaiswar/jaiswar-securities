@@ -1,0 +1,146 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_settlement_instructions_table_031
+      author: gemini-idx-assistant
+      changes:
+        - createTable:
+            tableName: settlement_instructions
+            columns:
+              - column:
+                  name: settlement_instruction_id # Unique ID for the settlement instruction
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: trade_id # Original trade this settlement is for
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_settlement_instr_trade_id
+                    references: trades(trade_id)
+              - column:
+                  name: allocation_id # If settlement is for a specific allocation leg
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_settlement_instr_allocation_id
+                    references: allocations(allocation_id) 
+              - column:
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_settlement_instr_account_id
+                    references: accounts(account_id)
+              - column:
+                  name: instrument_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_settlement_instr_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: side # Side of the transaction for this account (Buy/Sell)
+                  type: order_side_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: instruction_type
+                  type: settlement_instruction_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: settlement_status
+                  type: settlement_status_enum
+                  defaultValue: "PENDING_GENERATION"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: intended_settlement_date # Target settlement date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: actual_settlement_date # Actual date of settlement
+                  type: DATE
+              - column:
+                  name: quantity
+                  type: NUMERIC(19, 4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: net_settlement_amount # Cash amount to be settled
+                  type: NUMERIC(19, 4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: settlement_currency_code
+                  type: CHAR(3)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_settlement_instr_currency
+                    references: currencies(currency_code_iso_alpha)
+              - column:
+                  name: custodian_id # Custodian for this account/settlement
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_settlement_instr_custodian_id
+                    references: custodians(custodian_id)
+              - column:
+                  name: counterparty_bic # BIC of the counterparty
+                  type: VARCHAR(11)
+              - column:
+                  name: counterparty_account_at_custodian # Counterparty's account at their custodian
+                  type: VARCHAR(100)
+              - column:
+                  name: external_settlement_ref # Reference from external system (e.g., CSD, Custodian)
+                  type: VARCHAR(255)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_settlement_instr_created_by
+                    references: users(user_id)
+              - column:
+                  name: updated_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_settlement_instr_updated_by
+                    references: users(user_id)
+        - createIndex:
+            indexName: idx_settlement_instr_account_id
+            tableName: settlement_instructions
+            columns:
+              - column:
+                  name: account_id
+        - createIndex:
+            indexName: idx_settlement_instr_status_date
+            tableName: settlement_instructions
+            columns:
+              - column:
+                  name: settlement_status
+              - column:
+                  name: intended_settlement_date
+        - createIndex:
+            indexName: idx_settlement_instr_trade_id
+            tableName: settlement_instructions
+            columns:
+              - column:
+                  name: trade_id
+        - createIndex:
+            indexName: idx_settlement_instr_allocation_id
+            tableName: settlement_instructions
+            columns:
+              - column:
+                  name: allocation_id

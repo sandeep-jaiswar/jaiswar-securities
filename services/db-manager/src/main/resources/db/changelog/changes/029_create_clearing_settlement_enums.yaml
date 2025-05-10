@@ -1,0 +1,73 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_clearing_settlement_enums_029
+      author: gemini-idx-assistant
+      changes:
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'allocation_type_enum') THEN
+                CREATE TYPE allocation_type_enum AS ENUM (
+                  'PRE_TRADE_ALLOCATION',
+                  'POST_TRADE_ALLOCATION',
+                  'STEP_OUT',
+                  'STEP_IN',
+                  'TRADE_AGGREGATION',
+                  'MANUAL_ALLOCATION'
+                );
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'allocation_status_enum') THEN
+                CREATE TYPE allocation_status_enum AS ENUM (
+                  'PENDING_APPROVAL',
+                  'PENDING_EXECUTION',
+                  'ALLOCATED',
+                  'PARTIALLY_ALLOCATED',
+                  'REJECTED',
+                  'CANCELED',
+                  'SUBMITTED_TO_CLEARING'
+                );
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'settlement_instruction_type_enum') THEN
+                CREATE TYPE settlement_instruction_type_enum AS ENUM (
+                  'DELIVER_VS_PAYMENT',
+                  'RECEIVE_VS_PAYMENT',
+                  'DELIVER_FREE_OF_PAYMENT',
+                  'RECEIVE_FREE_OF_PAYMENT'
+                );
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'settlement_status_enum') THEN
+                CREATE TYPE settlement_status_enum AS ENUM (
+                  'PENDING_GENERATION',
+                  'PENDING_SUBMISSION',
+                  'SUBMITTED_TO_AGENT',
+                  'PENDING_MATCHING',
+                  'MATCHED',
+                  'UNMATCHED',
+                  'PENDING_SETTLEMENT',
+                  'SETTLED',
+                  'PARTIALLY_SETTLED',
+                  'FAILED_SETTLEMENT',
+                  'CANCELED',
+                  'REJECTED_BY_AGENT'
+                );
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false
+        - sql:
+            sql: |
+              DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'settlement_leg_type_enum') THEN
+                CREATE TYPE settlement_leg_type_enum AS ENUM ('CASH_PAYMENT', 'CASH_RECEIPT', 'SECURITY_DELIVERY', 'SECURITY_RECEIPT');
+              END IF; END $$;
+            dbms: postgresql
+            splitStatements: false

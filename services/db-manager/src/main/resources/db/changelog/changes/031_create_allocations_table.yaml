@@ -1,0 +1,146 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_allocations_table_030
+      author: gemini-idx-assistant
+      changes:
+        - createTable:
+            tableName: allocations
+            columns:
+              - column:
+                  name: allocation_id # Internal unique ID for the allocation leg
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: block_order_id # Optional: If allocating from a block order before fills
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_allocations_block_order_id
+                    references: orders(order_id) 
+              - column:
+                  name: trade_id # Optional: If allocating a specific executed trade
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_allocations_trade_id
+                    references: trades(trade_id)
+              - column:
+                  name: fix_alloc_id # FIX Tag 70: AllocID - Identifier for the allocation message/group
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_id # FIX Tag 79: AllocAccount
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_allocations_account_id
+                    references: accounts(account_id)
+              - column:
+                  name: instrument_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_allocations_instrument_id
+                    references: instruments(instrument_id)
+              - column:
+                  name: side # FIX Tag 54: Side
+                  type: order_side_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: allocated_quantity # FIX Tag 80: AllocQty
+                  type: NUMERIC(19, 4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: allocated_price # FIX Tag 366: AllocPrice / Tag 153: AllocAvgPx
+                  type: NUMERIC(19, 9)
+              - column:
+                  name: allocation_type
+                  type: allocation_type_enum
+                  constraints:
+                    nullable: false
+              - column:
+                  name: allocation_status
+                  type: allocation_status_enum
+                  defaultValue: "PENDING_APPROVAL"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transaction_time # Time of allocation instruction
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+              - column:
+                  name: trade_date # FIX Tag 75: TradeDate
+                  type: DATE
+              - column:
+                  name: settlement_date_intended # Intended settlement date for this allocation
+                  type: DATE
+              - column:
+                  name: net_money # Net amount for this allocation leg
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: commission # Commission for this allocation leg
+                  type: NUMERIC(19, 4)
+              - column:
+                  name: text # FIX Tag 58: Text
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_allocations_created_by
+                    references: users(user_id)
+              - column:
+                  name: updated_by
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_allocations_updated_by
+                    references: users(user_id)
+        - addUniqueConstraint:
+            constraintName: uq_fix_alloc_id_account_instrument_side # Ensures uniqueness for a given allocation message leg
+            tableName: allocations
+            columnNames: fix_alloc_id, account_id, instrument_id, side 
+        - createIndex:
+            indexName: idx_allocations_fix_alloc_id
+            tableName: allocations
+            columns:
+              - column:
+                  name: fix_alloc_id
+        - createIndex:
+            indexName: idx_allocations_account_id
+            tableName: allocations
+            columns:
+              - column:
+                  name: account_id
+        - createIndex:
+            indexName: idx_allocations_trade_id
+            tableName: allocations
+            columns:
+              - column:
+                  name: trade_id
+        - createIndex:
+            indexName: idx_allocations_block_order_id
+            tableName: allocations
+            columns:
+              - column:
+                  name: block_order_id
+        - createIndex:
+            indexName: idx_allocations_status
+            tableName: allocations
+            columns:
+              - column:
+                  name: allocation_status
