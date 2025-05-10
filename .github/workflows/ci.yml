@@ -18,6 +18,10 @@ jobs:
       - name: Setup Bazelisk (Bazel version manager)
         uses: bazelbuild/setup-bazelisk@v1
 
+      - name: Ensure Cache Path Exists
+        run: |
+          mkdir -p ~/.cache/bazel
+
       - name: Restore Bazel Cache
         uses: actions/cache@v4
         with:
@@ -26,6 +30,11 @@ jobs:
           key: bazel-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             bazel-${{ runner.os }}-
+
+      - name: Debug Cache
+        run: |
+          echo "Cache key: bazel-${{ runner.os }}-${{ github.sha }}"
+          ls -la ~/.cache/bazel || echo "Cache directory does not exist or is empty."
 
       - name: Determine changed targets
         id: changes
@@ -45,4 +54,8 @@ jobs:
       - name: Upload Test Logs on Failure
         if: failure()
         run: |
-          find bazel-testlogs -name "test.log" -exec cat {} \;
+          if [ -d bazel-testlogs ]; then
+            find bazel-testlogs -name "test.log" -exec cat {} \;
+          else
+            echo "No test logs to upload."
+          fi
