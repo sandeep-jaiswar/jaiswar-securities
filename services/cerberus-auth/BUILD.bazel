@@ -4,16 +4,20 @@ load("@rules_jvm_external//:defs.bzl", "artifact")
 java_library(
     name = "cerberus_auth_lib",
     srcs = glob(["src/main/java/**/*.java"]),
+    resources = glob(["src/main/resources/**"]),  # Added this line
     deps = [
         artifact("org.springframework.boot:spring-boot-starter-web"),
         artifact("org.springframework.boot:spring-boot-starter-security"),
         artifact("org.springframework.boot:spring-boot-starter-validation"),
+        artifact("org.springframework.boot:spring-boot-starter-data-jpa"),
+        artifact("org.postgresql:postgresql"),          # PostgreSQL driver
+        artifact("org.liquibase:liquibase-core"),        # Liquibase
         artifact("io.jsonwebtoken:jjwt-api"),
         artifact("io.jsonwebtoken:jjwt-impl"),
         artifact("io.jsonwebtoken:jjwt-jackson"),
 
         # Direct dependencies to satisfy strict deps
-        artifact("jakarta.validation:jakarta.validation-api"), # For @Valid annotation direct use
+        artifact("jakarta.validation:jakarta.validation-api"), 
         artifact("org.springframework.boot:spring-boot-autoconfigure"),
         artifact("org.springframework.boot:spring-boot"),
         artifact("org.springframework:spring-context"),
@@ -23,9 +27,17 @@ java_library(
         artifact("org.springframework.security:spring-security-core"),
         artifact("org.springframework.security:spring-security-web"),
         artifact("org.springframework:spring-web"),
-        artifact("org.apache.tomcat.embed:tomcat-embed-core"), # For jakarta.servlet
+        artifact("org.apache.tomcat.embed:tomcat-embed-core"), 
         artifact("org.springframework:spring-core"),
-        # Add other direct dependencies if new strict deps errors appear
+        artifact("jakarta.persistence:jakarta.persistence-api"),
+        artifact("org.springframework.data:spring-data-jpa"),
+        artifact("org.springframework:spring-orm"),
+        artifact("org.hibernate.orm:hibernate-core"),
+
+        # Added based on strict deps error
+        artifact("jakarta.annotation:jakarta.annotation-api"),
+        artifact("org.slf4j:slf4j-api"),
+        artifact("org.springframework:spring-tx"),
     ],
 )
 
@@ -33,5 +45,5 @@ java_binary(
     name = "cerberus_auth_server",
     main_class = "com.jaiswarsecurities.cerberusauth.CerberusAuthApplication",
     runtime_deps = [":cerberus_auth_lib"],
-    jvm_flags = ["-Dspring.profiles.active=default"], # Example JVM flag
+    jvm_flags = ["-Dspring.profiles.active=default"], 
 )
