@@ -2,8 +2,8 @@ package com.jaiswarsecurities.cerberusauth.model;
 
 public enum AccountStatus {
     ACTIVE,
-    SUSPENDED, // Manually suspended by an admin
-    LOCKED_BAD_CREDENTIALS, // Locked due to too many failed attempts
-    PENDING_APPROVAL, // New account, awaiting activation/approval
-    DEACTIVATED // User account is no longer active (e.g., employee left)
+    INACTIVE,               // Was DEACTIVATED, aligns with DB INACTIVE
+    SUSPENDED,              // Matches DB
+    PENDING_VERIFICATION,   // Was PENDING_APPROVAL, aligns with DB PENDING_VERIFICATION
+    LOCKED                  // Was LOCKED_BAD_CREDENTIALS, aligns with DB LOCKED
 }

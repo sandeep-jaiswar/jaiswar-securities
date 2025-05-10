@@ -5,111 +5,86 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users", indexes = {
     @Index(name = "idx_user_username", columnList = "username", unique = true),
     @Index(name = "idx_user_email", columnList = "email", unique = true),
-    @Index(name = "idx_user_employee_id", columnList = "employeeId", unique = true)
+    @Index(name = "idx_user_employee_id", columnList = "employee_id", unique = true) // Corrected columnList
 })
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO) // For UUIDs
+    @Column(name = "user_id")
+    private UUID id;
 
-    @Column(length = 50, unique = true, nullable = false)
+    @Column(name = "username", length = 100, unique = true, nullable = false)
     private String username;
 
-    @Column(length = 255, nullable = false)
-    private String password;
+    @Column(name = "hashed_password", length = 255, nullable = false)
+    private String hashedPassword;
 
-    @Column(length = 100, unique = true, nullable = false)
+    @Column(name = "email", length = 255, unique = true, nullable = false)
     private String email;
 
-    @Column(length = 50, unique = true, nullable = true)
+    @Column(name = "employee_id", length = 100, unique = true, nullable = true)
     private String employeeId;
 
-    @Column(length = 100, nullable = true)
+    @Column(name = "first_name", length = 100, nullable = true)
     private String firstName;
 
-    @Column(length = 100, nullable = true)
+    @Column(name = "last_name", length = 100, nullable = true)
     private String lastName;
 
-    @Column(length = 100)
-    private String department;
-
-    @Column(length = 100)
-    private String jobTitle;
-
-    @Column(length = 50)
-    private String managerEmployeeId;
+    // department, jobTitle, managerEmployeeId removed as they are not in the central schema
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 30, nullable = false)
-    private AccountStatus accountStatus = AccountStatus.PENDING_APPROVAL;
+    @Column(name = "status", length = 50, nullable = false) // Length should match DB enum definition, e.g., user_status_enum
+    private AccountStatus accountStatus = AccountStatus.PENDING_VERIFICATION; // Default value aligned with DB
 
-    @Column(nullable = false)
-    private boolean enabled = false; // Initial state, can be changed by admin or accountStatus logic
+    // 'enabled' field removed; its logic is now derived from 'accountStatus' via isEnabled() for Spring Security.
 
-    private LocalDateTime lastLoginDate;
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
 
-    private LocalDateTime passwordLastChanged;
+    // passwordLastChanged removed
 
-    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "failed_login_attempts", columnDefinition = "INT DEFAULT 0")
     private int failedLoginAttempts = 0;
 
-    @Column(nullable = false)
-    private boolean twoFactorEnabled = false;
+    // twoFactorEnabled removed
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "user_roles",
+        name = "user_roles", // Ensure this table name is correct as per db-manager schema (017_create_user_roles_table.yaml)
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // created_by and updated_by fields from schema are omitted for now for simplicity
 
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-        if (this.passwordLastChanged == null) {
-            this.passwordLastChanged = now;
+        if (this.createdAt == null) { // Allow manual setting for seeding etc.
+            this.createdAt = now;
         }
-        // Initial alignment of enabled based on accountStatus
-        synchronizeEnabledWithAccountStatus();
+        this.updatedAt = now;
+        // Default accountStatus is PENDING_VERIFICATION set at field declaration.
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-        synchronizeEnabledWithAccountStatus();
-    }
-
-    // Call this method to ensure 'enabled' reflects 'accountStatus' unless overridden.
-    private void synchronizeEnabledWithAccountStatus() {
-        if (this.accountStatus == AccountStatus.ACTIVE) {
-            // If an admin hasn't explicitly disabled it, and status is ACTIVE, it should be enabled.
-            // For now, we assume setting to ACTIVE implies it should be enabled.
-            this.enabled = true; 
-        } else if (this.accountStatus == AccountStatus.DEACTIVATED || 
-                   this.accountStatus == AccountStatus.SUSPENDED) {
-            this.enabled = false;
-        }
-        // For PENDING_APPROVAL or LOCKED_BAD_CREDENTIALS, 'enabled' might remain as is,
-        // or you could enforce 'enabled = false'. Let's make them explicitly disable for now.
-        else if (this.accountStatus == AccountStatus.PENDING_APPROVAL || 
-                 this.accountStatus == AccountStatus.LOCKED_BAD_CREDENTIALS) {
-            this.enabled = false;
-        }
     }
 
     // Constructors
@@ -117,55 +92,58 @@ public class User {
     }
 
     // Getters
-    public Long getId() { return id; }
+    public UUID getId() { return id; }
     public String getUsername() { return username; }
-    public String getPassword() { return password; }
+    public String getHashedPassword() { return hashedPassword; }
     public String getEmail() { return email; }
     public String getEmployeeId() { return employeeId; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
-    public String getDepartment() { return department; }
-    public String getJobTitle() { return jobTitle; }
-    public String getManagerEmployeeId() { return managerEmployeeId; }
     public AccountStatus getAccountStatus() { return accountStatus; }
-    public boolean isEnabled() { return enabled; } // Spring Security uses this
-    public LocalDateTime getLastLoginDate() { return lastLoginDate; }
-    public LocalDateTime getPasswordLastChanged() { return passwordLastChanged; }
+    public LocalDateTime getLastLoginAt() { return lastLoginAt; }
     public int getFailedLoginAttempts() { return failedLoginAttempts; }
-    public boolean isTwoFactorEnabled() { return twoFactorEnabled; }
     public Set<Role> getRoles() { return roles; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
+    // Spring Security's UserDetails interface typically requires isEnabled(), etc.
+    // We derive these from accountStatus.
+    public boolean isEnabled() {
+        // Define which statuses mean the account is effectively enabled for login
+        return this.accountStatus == AccountStatus.ACTIVE;
+    }
+
+    public boolean isAccountNonExpired() {
+        return true; // Or add logic if your statuses include an "expired" state
+    }
+
+    public boolean isAccountNonLocked() {
+        // Example: if LOCKED or SUSPENDED means locked
+        return this.accountStatus != AccountStatus.LOCKED && 
+               this.accountStatus != AccountStatus.SUSPENDED;
+    }
+
+    public boolean isCredentialsNonExpired() {
+        return true; // Or add logic for password expiry if that feature is reintroduced
+    }
+
     // Setters
-    public void setId(Long id) { this.id = id; }
+    public void setId(UUID id) { this.id = id; }
     public void setUsername(String username) { this.username = username; }
-    public void setPassword(String password) { this.password = password; }
+    public void setHashedPassword(String hashedPassword) { this.hashedPassword = hashedPassword; }
     public void setEmail(String email) { this.email = email; }
     public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
-    public void setDepartment(String department) { this.department = department; }
-    public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
-    public void setManagerEmployeeId(String managerEmployeeId) { this.managerEmployeeId = managerEmployeeId; }
     public void setAccountStatus(AccountStatus accountStatus) { 
         this.accountStatus = accountStatus;
-        synchronizeEnabledWithAccountStatus(); // Keep 'enabled' in sync
     }
-    // Allows explicit administrative override of 'enabled' status
-    public void setEnabled(boolean enabled) { 
-        this.enabled = enabled;
-        // If an admin explicitly enables, should we change accountStatus from e.g. SUSPENDED?
-        // For now, setting 'enabled' does not automatically change 'accountStatus' from a non-active state.
-        // If 'enabled' is set to true, but accountStatus is SUSPENDED, login would still fail in UserDetailsService.
-    }
-    public void setLastLoginDate(LocalDateTime lastLoginDate) { this.lastLoginDate = lastLoginDate; }
-    public void setPasswordLastChanged(LocalDateTime passwordLastChanged) { this.passwordLastChanged = passwordLastChanged; }
+    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
     public void setFailedLoginAttempts(int failedLoginAttempts) { this.failedLoginAttempts = failedLoginAttempts; }
-    public void setTwoFactorEnabled(boolean twoFactorEnabled) { this.twoFactorEnabled = twoFactorEnabled; }
     public void setRoles(Set<Role> roles) { this.roles = roles; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; } // Usually not set manually
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; } // Usually not set manually
+    // createdAt and updatedAt typically managed by @PrePersist/@PreUpdate or DB
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public void addRole(Role role) { this.roles.add(role); }
     public void removeRole(Role role) { this.roles.remove(role); }
@@ -182,7 +160,9 @@ public class User {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, employeeId);
+        // Prefer ID for hashCode if available, otherwise business key components.
+        if (id != null) return Objects.hash(id);
+        return Objects.hash(username, employeeId);
     }
 
     @Override
@@ -192,7 +172,6 @@ public class User {
                ", username='" + username + "'" +
                ", employeeId='" + employeeId + "'" +
                ", accountStatus=" + accountStatus +
-               ", enabled=" + enabled +
                "}";
     }
 }
