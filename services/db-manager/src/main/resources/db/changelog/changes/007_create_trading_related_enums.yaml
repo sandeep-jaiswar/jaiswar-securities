@@ -26,7 +26,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: market_data_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: order_type_enum
             values:
@@ -53,7 +53,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: order_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: order_status_enum
             values:
@@ -79,7 +79,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: order_status_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: order_side_enum
             values:
@@ -98,7 +98,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: order_side_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: time_in_force_enum
             values:
@@ -118,7 +118,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: time_in_force_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         # The exec_type_enum requires special handling due to the DROP TYPE statement.
         # This is a simplified conversion. In a production environment, altering an existing enum requires careful consideration of data and dependencies.
         - sql:
@@ -184,7 +184,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: trade_report_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: trade_status_internal_enum
             values:
@@ -203,7 +203,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: trade_status_internal_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: position_type_enum
             values:
@@ -220,7 +220,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: position_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: price_type_enum
             values:
@@ -241,4 +241,4 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: price_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public

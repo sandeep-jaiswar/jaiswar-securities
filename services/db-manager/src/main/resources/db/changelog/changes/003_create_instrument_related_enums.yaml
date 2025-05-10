@@ -22,7 +22,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: asset_class_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: instrument_status_enum
             values:
@@ -39,7 +39,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: instrument_status_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: identifier_type_enum
             values:
@@ -59,4 +59,4 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: identifier_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public

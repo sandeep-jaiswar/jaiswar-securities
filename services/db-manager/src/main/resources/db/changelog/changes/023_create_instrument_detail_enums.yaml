@@ -17,7 +17,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: issuer_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: bond_type_enum
             values:
@@ -37,7 +37,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: bond_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: coupon_frequency_enum
             values:
@@ -54,7 +54,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: coupon_frequency_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: day_count_convention_enum
             values:
@@ -72,7 +72,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: day_count_convention_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: derivative_type_enum
             values:
@@ -89,7 +89,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: derivative_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: option_type_enum
             values:
@@ -101,7 +101,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: option_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: exercise_style_enum
             values:
@@ -116,7 +116,7 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: exercise_style_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public
         - createType:
             typeName: settlement_type_enum
             values:
@@ -128,4 +128,4 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: settlement_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public

@@ -16,4 +16,4 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: calendar_type_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public

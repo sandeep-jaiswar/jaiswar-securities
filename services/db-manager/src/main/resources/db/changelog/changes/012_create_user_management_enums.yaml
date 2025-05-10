@@ -17,4 +17,4 @@ databaseChangeLog:
               - not:
                   - typeExists:
                       typeName: user_status_enum
-                      schemaName: public # Or your specific schema
+                      schemaName: public

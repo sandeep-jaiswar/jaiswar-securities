@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: alter_instruments_add_issuer_fk_027
+      id: alter_instruments_add_issuer_fk_028
       author: sandeep-jaiswar
       changes:
         - addColumn:
@@ -21,3 +21,13 @@ databaseChangeLog:
             columns:
               - column:
                   name: issuer_id
+      rollback:
+        - dropIndex:
+            tableName: instruments
+            indexName: idx_instruments_issuer_id
+        - dropForeignKeyConstraint:
+            baseTableName: instruments
+            constraintName: fk_instruments_issuer_id
+        - dropColumn:
+            tableName: instruments
+            columnName: issuer_id
