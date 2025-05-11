@@ -1,7 +1,22 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
 
+rust_library(
+    name = "ares_trade_lib",
+    srcs = glob(["src/**/*.rs"], exclude=["src/main.rs"]),
+    edition = "2021",
+    rustc_flags = [
+        "-C", "opt-level=3",
+        "-C", "lto",
+    ],
+)
+
 rust_binary(
     name = "ares-trade",
-    srcs = glob(["src/**/*.rs"]),
+    srcs = ["src/main.rs"],
     edition = "2021",
+    deps = [":ares_trade_lib"],
+    rustc_flags = [
+        "-C", "opt-level=3",
+        "-C", "lto",
+    ],
 )

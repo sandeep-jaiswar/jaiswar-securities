@@ -11,21 +11,21 @@ bazel_dep(name = "aspect_rules_ts", version = "3.5.3")
 # Java (Spring Boot, gRPC, etc.)
 bazel_dep(name = "rules_java", version = "8.11.0")
 bazel_dep(name = "rules_jvm_external", version = "6.7")
-bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "rules_proto", version = "7.1.0") # Keep for potential gRPC/protobuf use
 
 # Python
-bazel_dep(name = "rules_python", version = "1.4.0-rc4")
+bazel_dep(name = "rules_python", version = "1.4.0-rc4") # Keep if Python is used elsewhere
 
 # Tooling
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 
 # Grpc with rules_proto
-bazel_dep(name = "rules_proto_grpc", version = "5.0.1")
+bazel_dep(name = "rules_proto_grpc", version = "5.0.1") # Keep for potential gRPC/protobuf use
 
 # Utility Rules
 bazel_dep(name = "rules_pkg", version = "1.1.0")
-bazel_dep(name = "rules_oci", version = "2.2.6")
-bazel_dep(name = "platforms", version = "0.0.11")
+bazel_dep(name = "rules_oci", version = "2.2.6") # Useful for containerizing applications
+bazel_dep(name = "platforms", version = "0.0.11") # For cross-platform builds
 
 # Testing and license
 bazel_dep(name = "rules_testing", version = "0.8.0")
@@ -33,9 +33,8 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 
 # Rust support
 bazel_dep(name = "rules_rust", version = "0.61.0")
-
 # C++ support
-bazel_dep(name = "rules_cc", version = "0.1.1")
+bazel_dep(name = "rules_cc", version = "0.1.1") # Keep if C++ interop or dependencies are needed
 
 # Go support
 bazel_dep(name = "rules_go", version = "0.54.0")
@@ -48,7 +47,7 @@ maven.install(
     artifacts = [
         "org.springframework.boot:spring-boot-starter-web:3.1.5",
         "org.springframework.boot:spring-boot-starter-security:3.1.5",
-        "org.springframework.boot:spring-boot-starter-validation:3.1.5", # Added for jakarta.validation
+        "org.springframework.boot:spring-boot-starter-validation:3.1.5",
         "io.jsonwebtoken:jjwt-api:0.11.5",
         "io.jsonwebtoken:jjwt-impl:0.11.5",
         "io.jsonwebtoken:jjwt-jackson:0.11.5",
@@ -61,3 +60,34 @@ use_repo(maven, "maven")
 java = use_extension("@rules_java//java:extensions.bzl", "java")
 java.toolchain(version = "17")
 use_repo(java, "remote_java_tools", "remotejdk_17")
+
+# Go SDK and toolchains
+go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
+go_sdk.download(version = "1.21.5") # Specify your desired Go version
+use_repo(go_sdk, "go_sdk")
+
+# Rust toolchain
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(edition = "2021", version = "1.70.0") # Specify your desired Rust version and edition
+use_repo(rust, "rust_toolchains")
+
+# Node.js toolchain
+nodejs = use_extension("@rules_nodejs//nodejs:extensions.bzl", "nodejs")
+nodejs.toolchain(node_version = "20.10.0") # Specify your desired Node.js version
+use_repo(nodejs, "nodejs_toolchains")
+
+# If you use pnpm, yarn, or npm for package management with rules_js/rules_ts:
+# js_common = use_extension("@aspect_rules_js//js:extensions.bzl", "js_common")
+# js_common.npm_translate_lock(
+#     name = "npm", # Name this repository, e.g., "npm" for npm, "pnpm" for pnpm
+#     pnpm_lock = "//:pnpm-lock.yaml", # Path to your pnpm-lock.yaml
+#     # or yarn_lock = "//:yarn.lock", # Path to your yarn.lock
+#     # or package_lock_json = "//:package-lock.json", # Path to your package-lock.json
+#     verify_node_modules_ignored = "//:.bazelignore",
+# )
+# use_repo(js_common, "npm") # Or "pnpm", etc.
+
+# TypeScript toolchain (usually comes with aspect_rules_ts and configured via tsconfig)
+# ts = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ts")
+# ts.toolchain(version = "5.2.2") # Example, if specific version needed beyond what rules_ts provides by default
+# use_repo(ts, "ts_toolchains")
