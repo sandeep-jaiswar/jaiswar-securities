@@ -1,11 +1,16 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+load("@crates_io//:defs.bzl", "all_crate_deps") # Import for Cargo dependencies
 
 rust_binary(
-    name = "ares_trade_bin",
+    name = "ares-trade",
     srcs = glob(["src/**/*.rs"]),
     deps = [
-        "//libs/common:networking",
-        "//libs/common:metrics",
-    ],
+        # "//libs/common:networking", # Temporarily commented out
+        # "//libs/common:metrics",    # Temporarily commented out
+    ] + all_crate_deps( # Add all dependencies from Cargo.toml
+        normal = True, # Or development = True if some are dev-deps needed for build
+    ),
     edition = "2021",
+    # Crate features can be enabled here if needed, e.g.
+    # features = ["your_feature_name"],
 )

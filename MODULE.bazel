@@ -33,6 +33,7 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 
 # Rust support
 bazel_dep(name = "rules_rust", version = "0.61.0")
+bazel_dep(name = "cargo_bazel", version = "0.41.0") # <--- ADDED
 
 # C++ support
 bazel_dep(name = "rules_cc", version = "0.1.1")
@@ -61,3 +62,14 @@ use_repo(maven, "maven")
 java = use_extension("@rules_java//java:extensions.bzl", "java")
 java.toolchain(version = "17")
 use_repo(java, "remote_java_tools", "remotejdk_17")
+
+# Cargo dependencies for Rust # <--- ADDED SECTION
+cargo = use_extension("@cargo_bazel//:extensions.bzl", "cargo")
+cargo.raze(
+    lockfile = "//:Cargo.Bazel.lock", # This will be generated
+    manifests = [
+        "//apps/ares-trade:Cargo.toml",
+        # Add other Cargo.toml files here if they exist and need to be managed by Bazel
+    ],
+)
+use_repo(cargo, "crates_io")
