@@ -6,18 +6,33 @@
 
   # Use https://search.nixos.org/packages to find packages
   packages = [
-    # pkgs.go
-    # pkgs.python311
-    # pkgs.python311Packages.pip
-    # pkgs.nodejs_20
-    # pkgs.nodePackages.nodemon
+    pkgs.bazel_7 # Bazel build tool
+    pkgs.go
+    pkgs.rustc
+    pkgs.cargo
+    pkgs.rust-analyzer # For Rust language server
+    pkgs.jdk # For Java Development Kit (defaults to a recent stable version)
+    pkgs.sbt # Scala Build Tool (even if using Bazel, might be useful for Scala tooling)
+    pkgs.scala # Scala language
+    pkgs.nodejs_20 # Node.js (LTS version)
+    pkgs.bun # Bun JavaScript runtime
   ];
 
   # Sets environment variables in the workspace
-  env = {};
+  env = {
+    # JAVA_HOME can be useful for Java projects
+    # Nixpkgs typically sets this up, but explicitly can't hurt if needed by specific tools
+    # JAVA_HOME = "${pkgs.jdk}/lib/openjdk"; # Example, adjust if needed based on pkgs.jdk structure
+  };
+
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
+      "rust-lang.rust-analyzer", # Rust Language Server
+      "vscjava.vscode-java-pack", # Java extension pack
+      "scala-lang.scala", # Scala language support (Metals)
+      "dbaeumer.vscode-eslint", # ESLint for Node.js/Bun projects
+      "oven.bun-vscode" # Bun support
       # "vscodevim.vim"
     ];
 
@@ -44,6 +59,8 @@
       onCreate = {
         # Example: install JS dependencies from NPM
         # npm-install = "npm install";
+        # Bun install example (if you have a bun.lockb and package.json)
+        # bun-install = "bun install";
       };
       # Runs when the workspace is (re)started
       onStart = {
