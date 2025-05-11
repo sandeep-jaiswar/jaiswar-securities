@@ -5,18 +5,7 @@
   channel = "stable-24.05"; # or "unstable"
 
   # Use https://search.nixos.org/packages to find packages
-  packages = [
-    pkgs.bazel_7 # Bazel build tool
-    pkgs.go
-    pkgs.rustc
-    pkgs.cargo
-    pkgs.rust-analyzer # For Rust language server
-    pkgs.jdk # For Java Development Kit (defaults to a recent stable version)
-    pkgs.sbt # Scala Build Tool (even if using Bazel, might be useful for Scala tooling)
-    pkgs.scala # Scala language
-    pkgs.nodejs_20 # Node.js (LTS version)
-    pkgs.bun # Bun JavaScript runtime
-  ];
+  packages = [];
 
   # Sets environment variables in the workspace
   env = {
