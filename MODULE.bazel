@@ -33,7 +33,7 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 
 # Rust support
 bazel_dep(name = "rules_rust", version = "0.61.0")
-bazel_dep(name = "cargo_bazel", version = "0.24.0") # Added cargo-bazel
+# Removed: bazel_dep(name = "cargo_bazel", version = "0.24.0")
 
 # C++ support
 bazel_dep(name = "rules_cc", version = "0.1.1")
@@ -89,12 +89,14 @@ nodejs_ext.toolchain(
 )
 use_repo(nodejs_ext, "nodejs_toolchains")
 
-# Cargo Bazel for Rust dependencies
+# Rust Crates integration using rules_rust extension
 # Renamed 'crates' to 'ares_crates' to avoid potential conflicts if other Cargo projects exist
-ares_crates = use_extension("@cargo_bazel//:extensions.bzl", "crates")
-ares_crates.translate(
+# Using the extension from rules_rust directly
+ares_crates = use_extension("@rules_rust//rust:extensions.bzl", "crates") 
+ares_crates.from_cargo(
     name = "ares_crates", # Repository name for these crates
     cargo_lockfile = "//apps/ares-trade:Cargo.lock", # Path to the lock file
+    manifest = "//apps/ares-trade:Cargo.toml",       # Path to the manifest file (added)
 )
 use_repo(ares_crates, "ares_crates") # Make the repository available
 
