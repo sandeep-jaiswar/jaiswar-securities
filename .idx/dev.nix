@@ -5,18 +5,7 @@
   channel = "stable-24.05"; # or "unstable"
 
   # Use https://search.nixos.org/packages to find packages
-  packages = [
-    pkgs.bazel_7 # Bazel build tool
-    pkgs.go
-    pkgs.rustc
-    pkgs.cargo
-    pkgs.rust-analyzer # For Rust language server
-    pkgs.jdk # For Java Development Kit (defaults to a recent stable version)
-    pkgs.sbt # Scala Build Tool (even if using Bazel, might be useful for Scala tooling)
-    pkgs.scala # Scala language
-    pkgs.nodejs_20 # Node.js (LTS version)
-    pkgs.bun # Bun JavaScript runtime
-  ];
+  packages = [];
 
   # Sets environment variables in the workspace
   env = {
@@ -28,10 +17,10 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      "rust-lang.rust-analyzer", # Rust Language Server
-      "vscjava.vscode-java-pack", # Java extension pack
-      "scala-lang.scala", # Scala language support (Metals)
-      "dbaeumer.vscode-eslint", # ESLint for Node.js/Bun projects
+      "rust-lang.rust-analyzer" # Rust Language Server
+      "vscjava.vscode-java-pack" # Java extension pack
+      "scala-lang.scala" # Scala language support (Metals)
+      "dbaeumer.vscode-eslint" # ESLint for Node.js/Bun projects
       "oven.bun-vscode" # Bun support
       # "vscodevim.vim"
     ];
@@ -41,7 +30,7 @@
       enable = true;
       previews = {
         # web = {
-        #   # Example: run "npm run dev" with PORT set to IDX's defined port for previews,
+        #   # Example: run "npm run dev" with PORT set to IDX's defined port for previews
         #   # and show it in IDX's web preview panel
         #   command = ["npm" "run" "dev"];
         #   manager = "web";

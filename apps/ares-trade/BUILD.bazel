@@ -1,9 +1,13 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+# Import the crates repository defined in MODULE.bazel
+load("@ares_crates//:defs.bzl", "all_crate_deps")
 
 rust_library(
     name = "ares_trade_lib",
     srcs = glob(["src/**/*.rs"], exclude=["src/main.rs"]),
     edition = "2021",
+    # Add dependencies from Cargo.toml using the generated targets
+    deps = all_crate_deps(normal = True), # Includes standard dependencies
     rustc_flags = [
         "-C", "opt-level=3",
         "-C", "lto",
@@ -14,7 +18,8 @@ rust_binary(
     name = "ares-trade",
     srcs = ["src/main.rs"],
     edition = "2021",
-    deps = [":ares_trade_lib"],
+    # The library already includes crate dependencies, so they are transitive here
+    deps = [":ares_trade_lib"], 
     rustc_flags = [
         "-C", "opt-level=3",
         "-C", "lto",

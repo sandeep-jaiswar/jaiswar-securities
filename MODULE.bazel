@@ -33,6 +33,7 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 
 # Rust support
 bazel_dep(name = "rules_rust", version = "0.61.0")
+bazel_dep(name = "cargo_bazel", version = "0.24.0") # Added cargo-bazel
 
 # C++ support
 bazel_dep(name = "rules_cc", version = "0.1.1")
@@ -87,6 +88,15 @@ nodejs_ext.toolchain(
     node_version = "20.10.0",
 )
 use_repo(nodejs_ext, "nodejs_toolchains")
+
+# Cargo Bazel for Rust dependencies
+# Renamed 'crates' to 'ares_crates' to avoid potential conflicts if other Cargo projects exist
+ares_crates = use_extension("@cargo_bazel//:extensions.bzl", "crates")
+ares_crates.translate(
+    name = "ares_crates", # Repository name for these crates
+    cargo_lockfile = "//apps/ares-trade:Cargo.lock", # Path to the lock file
+)
+use_repo(ares_crates, "ares_crates") # Make the repository available
 
 # If you use pnpm, yarn, or npm for package management with rules_js/rules_ts:
 # js_common = use_extension("@aspect_rules_js//js:extensions.bzl", "js_common")
