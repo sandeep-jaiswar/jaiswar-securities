@@ -1,7 +1,9 @@
 use crate::db::{self, DbPool, NewOrderRequest, Order, OrderStatus, OrderType, DbError};
 use uuid::Uuid;
 use rust_decimal::Decimal;
+use std::collections::HashMap;
 use std::fmt;
+use tokio::sync::RwLock; // For thread-safe access to the cache
 
 // --- Engine Error Definition ---
 #[derive(Debug)]
@@ -9,7 +11,8 @@ pub enum EngineError {
     Validation(String),
     Database(DbError),
     OrderNotFound(Uuid),
-    UpdateConflict(String), // Added for cases like status transition errors
+    UpdateConflict(String),
+    CacheError(String), // For cache-specific issues, though unlikely with RwLock directly
 }
 
 impl fmt::Display for EngineError {
@@ -19,6 +22,7 @@ impl fmt::Display for EngineError {
             EngineError::Database(db_err) => write!(f, "Database Error: {:?}", db_err),
             EngineError::OrderNotFound(order_id) => write!(f, "Order not found: {}", order_id),
             EngineError::UpdateConflict(msg) => write!(f, "Update Conflict: {}", msg),
+            EngineError::CacheError(msg) => write!(f, "Cache Error: {}", msg),
         }
     }
 }
@@ -28,7 +32,7 @@ impl std::error::Error for EngineError {}
 impl From<DbError> for EngineError {
     fn from(err: DbError) -> Self {
         match err {
-            DbError::NotFound => EngineError::OrderNotFound(Uuid::nil()), // Generic, might need context for specific ID
+            DbError::NotFound => EngineError::OrderNotFound(Uuid::nil()), 
             _ => EngineError::Database(err),
         }
     }
@@ -38,11 +42,15 @@ impl From<DbError> for EngineError {
 #[derive(Debug)]
 pub struct TradingEngine {
     db_pool: DbPool,
+    order_cache: RwLock<HashMap<Uuid, Order>>,
 }
 
 impl TradingEngine {
     pub fn new(db_pool: DbPool) -> Self {
-        TradingEngine { db_pool }
+        TradingEngine {
+            db_pool,
+            order_cache: RwLock::new(HashMap::new()),
+        }
     }
 
     fn validate_new_order_request(order_request: &NewOrderRequest) -> Result<(), EngineError> {
@@ -57,46 +65,77 @@ impl TradingEngine {
         Ok(())
     }
 
+    /// Retrieves an order, first checking cache, then DB. Populates cache if fetched from DB.
+    pub async fn get_order(&self, order_id: Uuid) -> Result<Option<Order>, EngineError> {
+        // 1. Try to get from cache with a read lock
+        let cached_order = self.order_cache.read().await.get(&order_id).cloned();
+        if cached_order.is_some() {
+            // println!("[Cache HIT] Order {} found in cache.", order_id);
+            return Ok(cached_order);
+        }
+
+        // println!("[Cache MISS] Order {} not in cache, fetching from DB.", order_id);
+        // 2. If not in cache, fetch from DB
+        match db::get_order_by_id(&self.db_pool, order_id).await {
+            Ok(Some(db_order)) => {
+                // 3. Populate cache with a write lock
+                let mut cache_writer = self.order_cache.write().await;
+                cache_writer.insert(order_id, db_order.clone());
+                // println!("[Cache POPULATE] Order {} added to cache.", order_id);
+                Ok(Some(db_order))
+            }
+            Ok(None) => Ok(None), // Order not found in DB either
+            Err(db_err) => Err(EngineError::from(db_err)),
+        }
+    }
+
     pub async fn submit_new_order(&self, order_request: &NewOrderRequest) -> Result<Order, EngineError> {
         Self::validate_new_order_request(order_request)?;
+        
         let order_id = db::create_order(&self.db_pool, order_request, OrderStatus::PendingValidation).await?;
+        
+        // Fetch the order from DB to ensure we have the full, persisted object
         match db::get_order_by_id(&self.db_pool, order_id).await? {
-            Some(order) => Ok(order),
-            None => Err(EngineError::OrderNotFound(order_id)), 
+            Some(persisted_order) => {
+                // Add to cache
+                let mut cache_writer = self.order_cache.write().await;
+                cache_writer.insert(order_id, persisted_order.clone());
+                // println!("[Cache POPULATE on submit] Order {} added to cache.", order_id);
+                Ok(persisted_order)
+            }
+            None => Err(EngineError::OrderNotFound(order_id)), // Should not happen if create succeeded
         }
     }
 
     pub async fn confirm_order(&self, order_id: Uuid, new_status: OrderStatus) -> Result<Order, EngineError> {
-        // 1. Get the current order to check its status before updating
-        let order = match db::get_order_by_id(&self.db_pool, order_id).await? {
+        // 1. Get the current order (will use cache if available, or fetch from DB and populate cache)
+        let order = match self.get_order(order_id).await? {
             Some(o) => o,
             None => return Err(EngineError::OrderNotFound(order_id)),
         };
 
-        // 2. Add any state transition validation if needed (e.g., only PendingValidation can go to New)
         if order.order_status != OrderStatus::PendingValidation && new_status == OrderStatus::New {
             return Err(EngineError::UpdateConflict(
                 format!("Order {} cannot be moved to New from status {:?}. Expected PendingValidation.", order_id, order.order_status)
             ));
         }
-        // Add more specific transition rules as the engine evolves
 
-        // 3. Update the order status in the database
-        // Consider adding last_updated_by here if that field is added to db::update_order_status
         match db::update_order_status(&self.db_pool, order_id, new_status).await {
-            Ok(0) => {
-                // This case should ideally be caught by the initial get_order_by_id, 
-                // but as a safeguard if something changed between get and update.
-                Err(EngineError::OrderNotFound(order_id))
-            }
-            Ok(_) => { // Rows affected > 0
-                // 4. Fetch the updated order to return its new state
+            Ok(0) => Err(EngineError::OrderNotFound(order_id)),
+            Ok(_) => {
+                // Fetch the updated order to get its new state (e.g., updated_at)
                 match db::get_order_by_id(&self.db_pool, order_id).await? {
-                    Some(updated_order) => Ok(updated_order),
-                    None => Err(EngineError::OrderNotFound(order_id)), // Should not happen if update succeeded
+                    Some(updated_db_order) => {
+                        // Update the cache with the new version of the order
+                        let mut cache_writer = self.order_cache.write().await;
+                        cache_writer.insert(order_id, updated_db_order.clone());
+                        // println!("[Cache UPDATE on confirm] Order {} updated in cache.", order_id);
+                        Ok(updated_db_order)
+                    }
+                    None => Err(EngineError::OrderNotFound(order_id)), 
                 }
             }
-            Err(e) => Err(EngineError::from(e)), // Convert DbError to EngineError
+            Err(e) => Err(EngineError::from(e)),
         }
     }
 }
