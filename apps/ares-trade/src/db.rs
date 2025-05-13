@@ -8,7 +8,7 @@ use chrono::{DateTime, Utc}; // For TIMESTAMP WITH TIME ZONE
 
 // --- Custom Enum Definitions (Mirroring PostgreSQL ENUMs) ---
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)] // Added Copy
 pub enum OrderSide {
     Buy,
     Sell,
@@ -32,7 +32,7 @@ impl OrderSide {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)] // Added Copy
 pub enum OrderType {
     Market,
     Limit,
@@ -82,7 +82,7 @@ impl OrderType {
 }
 
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)] // Added Copy
 pub enum TimeInForce {
     Day,
     Gtc,
@@ -111,7 +111,7 @@ impl TimeInForce {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)] // Added Copy
 pub enum OrderStatus {
     New,              // FIX 0
     PartialFill,      // FIX 1 (PARTIAL_FILL)
@@ -272,6 +272,7 @@ pub enum DbError {
     R2D2(r2d2::Error),
     Mapping(String),
     NotFound,
+    UpdateFailed(String),
 }
 
 impl From<PostgresError> for DbError {
@@ -317,7 +318,8 @@ pub async fn create_order(
     let transact_time = Utc::now();
     let leaves_quantity = order_data.order_quantity;
     let cum_quantity = Decimal::ZERO;
-    let time_in_force_str = order_data.time_in_force.as_ref().map_or(TimeInForce::Day.as_str(), |tif| tif.as_str());
+    // Safely get time_in_force, defaulting to Day if None
+    let time_in_force_val = order_data.time_in_force.unwrap_or(TimeInForce::Day);
 
     let row = client.query_one(
         r#"
@@ -346,7 +348,7 @@ pub async fn create_order(
             &cum_quantity,    
             &order_data.price,
             &order_data.currency_code,
-            &time_in_force_str,
+            &time_in_force_val.as_str(), // Use the unwrapped or default value
             &transact_time,
             &initial_status.as_str(),
             &order_data.execution_destination,
@@ -381,9 +383,43 @@ pub async fn get_order_by_id(pool: &DbPool, order_id_to_find: Uuid) -> Result<Op
     }
 }
 
+pub async fn update_order_status(
+    pool: &DbPool,
+    order_id_to_update: Uuid,
+    new_status: OrderStatus,
+    // last_updated_by: Option<&str>, // Consider adding who updated it
+) -> Result<u64, DbError> {
+    let mut client = pool.get()?;
+    let updated_at_time = Utc::now();
+
+    let rows_affected = client.execute(
+        r#"
+        UPDATE orders
+        SET 
+            order_status = $1::order_status_enum,
+            updated_at = $2
+        WHERE order_id = $3
+        "#,
+        &[
+            &new_status.as_str(),
+            &updated_at_time,
+            &order_id_to_update,
+            // &last_updated_by, // If you add this parameter
+        ],
+    )?;
+
+    if rows_affected == 0 {
+        Err(DbError::NotFound) // Or a more specific UpdateFailedNoRows error
+    } else {
+        Ok(rows_affected)
+    }
+}
+
+
 // TODO:
-// - Add functions for updating order status and other fields.
+// - Add functions for updating other order fields (e.g. price, quantity for replace requests).
 // - Ensure Cargo.toml has `postgres` (with "with-chrono-0_4", "with-rust_decimal-1", "with-uuid-1" features),
 //   `r2d2`, `r2d2-postgres`, `uuid` (with "v4" feature), `rust_decimal` (with "db-postgres"), `chrono` (with "serde"). (DONE for basic setup)
 // - Add robust error handling for db_url.parse() in create_db_pool. (IMPROVED)
 // - Consider using a macro for cleaner enum from_str/as_str implementations (e.g., `strum` crate).
+// - Add `last_updated_by` to `update_order_status` and relevant table columns if needed.

@@ -17,10 +17,10 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      "rust-lang.rust-analyzer", # Rust Language Server
-      "vscjava.vscode-java-pack", # Java extension pack
-      "scala-lang.scala", # Scala language support (Metals)
-      "dbaeumer.vscode-eslint", # ESLint for Node.js/Bun projects
+      "rust-lang.rust-analyzer" # Rust Language Server
+      "vscjava.vscode-java-pack" # Java extension pack
+      "scala-lang.scala" # Scala language support (Metals)
+      "dbaeumer.vscode-eslint" # ESLint for Node.js/Bun projects
       "oven.bun-vscode" # Bun support
       # "vscodevim.vim"
     ];
